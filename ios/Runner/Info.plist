@@ -26,6 +26,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+
+	<key>NSCameraUsageDescription</key>
+	<string>GoTr-AI usa la fotocamera per la vista AR durante la navigazione.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>GoTr-AI usa la tua posizione per mostrarti sulla mappa e guidarti durante la navigazione sui sentieri.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>GoTr-AI usa la tua posizione per mantenere attiva la navigazione e il rilevamento del percorso.</string>
+
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -43,16 +51,10 @@
 					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
 					<key>UISceneStoryboardFile</key>
 					<string>Main</string>
-				<key>NSCameraUsageDescription</key>
-<string>GoTr-AI usa la fotocamera per la vista AR durante la navigazione.</string>
-</dict>
+				</dict>
 			</array>
-		<key>NSCameraUsageDescription</key>
-<string>GoTr-AI usa la fotocamera per la vista AR durante la navigazione.</string>
-</dict>
-	<key>NSCameraUsageDescription</key>
-<string>GoTr-AI usa la fotocamera per la vista AR durante la navigazione.</string>
-</dict>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -72,7 +74,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-<key>NSCameraUsageDescription</key>
-<string>GoTr-AI usa la fotocamera per la vista AR durante la navigazione.</string>
 </dict>
 </plist>
