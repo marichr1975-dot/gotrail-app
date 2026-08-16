@@ -1,0 +1,47 @@
+name: gotr_ai_3_0
+description: GoTr-AI 6.9 - percorsi salvati e navigazione offline
+publish_to: 'none'
+version: 6.9.0+37
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_map: ^7.0.2
+  geolocator: ^14.0.2
+  flutter_compass: ^0.8.1
+  latlong2: ^0.9.1
+  http: ^1.2.2
+  url_launcher: ^6.3.1
+  path_provider: ^2.1.6
+  mbtiles: ^0.4.2
+  sqlite3_flutter_libs: ^0.5.42
+  vector_map_tiles: ^8.0.0
+  vector_map_tiles_mbtiles: ^1.2.0
+  vector_tile_renderer: ^5.2.1
+  camera: ^0.11.2
+  camera_android: ^0.10.10+18
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/monte_pelmo.png
+    - assets/images/avvio_alleghe.jpeg
+    - assets/images/card_sentieri.jpg
+    - assets/images/card_parcheggi.jpg
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/images/app_icon.png
+  adaptive_icon_background: "#24943F"
+  adaptive_icon_foreground: assets/images/app_icon.png

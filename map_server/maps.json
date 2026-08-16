@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "maps": [
+    {
+      "id": "veneto",
+      "name": "Veneto",
+      "region": "Veneto",
+      "version": 1,
+      "url": "https://github.com/marichr1975-dot/nuove-mappe/releases/download/maps-v1/veneto.mbtiles",
+      "size": 305463296,
+      "bounds": [44.75, 10.60, 46.70, 13.15]
+    }
+  ]
+}

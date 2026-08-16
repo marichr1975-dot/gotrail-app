@@ -1,0 +1,9 @@
+GoTr-AI 4.7 - Mappe provinciali compresse
+
+Questa versione scarica i file *_gotr.json.gz da GitHub, li decomprime sul telefono e salva il GeoJSON offline.
+Caricare nel repository GitHub i 13 file .json.gz mantenendo esattamente i nomi generati dal compressore.
+
+Test J6:
+flutter clean
+flutter pub get
+flutter run

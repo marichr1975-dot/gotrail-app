@@ -1,0 +1,19 @@
+GoTr-AI 4.4 - COMANDI FLUTTER PER TEST SU SAMSUNG J6
+
+1) Apri PowerShell nella cartella GoTr_AI_4_4
+
+2) Controlla che il J6 sia collegato:
+flutter devices
+
+3) Pulisci e prepara il progetto:
+flutter clean
+flutter pub get
+dart run flutter_launcher_icons
+
+4) Avvia GoTr-AI 4.4 sul J6:
+flutter run -d 537ed2aa
+
+Se l'ID del telefono e' cambiato, usa quello mostrato da "flutter devices".
+
+5) Per creare l'APK release:
+flutter build apk --release
