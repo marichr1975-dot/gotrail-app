@@ -203,7 +203,8 @@ class MwmReleaseService {
       }
 
       if (await target.exists()) await target.delete();
-      return temp.rename(target.path);
+      final renamed = await temp.rename(target.path);
+      return renamed;
     } finally {
       try { await sink?.close(); } catch (_) {}
       client.close();
