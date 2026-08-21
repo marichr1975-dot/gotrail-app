@@ -18,7 +18,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: '3.44.8'
           cache: true
 
       - name: Flutter doctor
@@ -26,6 +26,9 @@ jobs:
 
       - name: Dependencies
         run: flutter pub get
+
+      - name: Configure iOS project
+        run: flutter build ios --config-only --no-codesign
 
       - name: CocoaPods
         run: |
