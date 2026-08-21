@@ -1,0 +1,9 @@
+GoTr-AI V9_AI_1 FIX2
+
+- V9 stabile non modificata.
+- Prima di Gemini, INIZIA acquisisce una posizione GPS reale.
+- Mostra a schermo GPS OK con latitudine/longitudine, cosi il test non dipende dall'icona Android.
+- Gemini passa a gemini-3.5-flash-lite, modello ottimizzato per bassa latenza.
+- Output limitato a 450 token.
+- Timeout portato a 60 secondi con messaggio leggibile.
+- Nessuna modifica alla grafica generale o alle mappe.

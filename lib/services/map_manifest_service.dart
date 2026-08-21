@@ -31,13 +31,24 @@ class MapManifestService {
   Future<List<RegionMap>> load({bool forceRefresh = false}) async {
     if (!forceRefresh && _cache != null) return _cache!;
 
+    // V9: avvio offline-first. Per la normale ricerca non aspettiamo Internet:
+    // il catalogo Veneto integrato è disponibile immediatamente e riconosce
+    // anche veneto.mbtiles copiato via ADB/PowerShell.
+    if (!forceRefresh) {
+      final fallback = _fallbackMaps
+          .map((e) => RegionMap.fromJson(Map<String, dynamic>.from(e)))
+          .toList(growable: false);
+      _cache = fallback;
+      return fallback;
+    }
+
     try {
       final response = await http
           .get(
             Uri.parse(manifestUrl),
-            headers: const {'User-Agent': 'GoTr-AI/6.6'},
+            headers: const {'User-Agent': 'GoTr-AI/9.0'},
           )
-          .timeout(const Duration(seconds: 12));
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -45,9 +56,7 @@ class MapManifestService {
           final maps = <RegionMap>[];
           for (final raw in decoded['maps'] as List) {
             if (raw is Map) {
-              maps.add(
-                RegionMap.fromJson(Map<String, dynamic>.from(raw)),
-              );
+              maps.add(RegionMap.fromJson(Map<String, dynamic>.from(raw)));
             }
           }
           if (maps.isNotEmpty) {
@@ -56,9 +65,7 @@ class MapManifestService {
           }
         }
       }
-    } catch (_) {
-      // Offline/server non disponibile: usa il catalogo di emergenza integrato.
-    }
+    } catch (_) {}
 
     final fallback = _fallbackMaps
         .map((e) => RegionMap.fromJson(Map<String, dynamic>.from(e)))

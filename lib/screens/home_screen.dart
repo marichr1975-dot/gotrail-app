@@ -1,274 +1,408 @@
-
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter/services.dart';
 
-import '../models/map_package.dart';
 import '../services/gps_service.dart';
-import '../services/map_package_manager.dart';
-import '../services/map_manager.dart';
-import 'map_download_dialog.dart';
-import 'map_screen.dart';
-import 'planning_map_screen.dart';
+import '../services/mwm_map_service.dart';
+import '../services/region_map_manager_service.dart';
+import 'map_manager_screen.dart';
 import 'saved_routes_screen.dart';
+import 'start_overview_map_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  static const _blue = Color(0xFF0B5FD7);
+  static const _green = Color(0xFF20A85A);
 
-class _HomeScreenState extends State<HomeScreen> {
-  bool _working = false;
+  Future<void> _start(BuildContext context) async {
+    final hasMaps = await RegionMapManagerService.instance.hasAnyInstalledMap();
+    if (!context.mounted) return;
 
-  Future<void> _start() async {
-    if (_working) return;
-    setState(() => _working = true);
+    if (!hasMaps) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const MapManagerScreen()),
+      );
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const AlertDialog(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.6),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                'Cerco la tua posizione GPS…',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
 
     try {
-      final position = await GpsService.currentPosition();
-      if (!mounted) return;
+      final point = await GpsService.currentPosition();
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
 
-      final point = LatLng(position.latitude, position.longitude);
-      final package = MapCatalog.packageFor(point);
-
-      if (package == null) {
-        await showDialog<void>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text(
-              'Zona non disponibile',
-              style: TextStyle(fontWeight: FontWeight.w900),
+      final regionId =
+          RegionMapManagerService.instance.regionIdForPoint(point);
+      if (regionId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Questa zona non è ancora disponibile nelle mappe offline.',
             ),
-            content: const Text(
-              'La mappa GoTr di questa zona non è ancora disponibile.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('OK'),
-              ),
-            ],
           ),
         );
         return;
       }
 
-      // INIZIA usa lo stesso archivio cartografico MBTiles di PIANIFICA.
-      // Se la mappa regionale è già presente non viene riscaricata.
-      await MapManager.instance.ensureMapForPoint(point);
-      if (!mounted) return;
+      final full =
+          await RegionMapManagerService.instance.isRegionFullyInstalled(
+        regionId,
+      );
+      if (!context.mounted) return;
 
-      // I dati operativi delle 4 icone sono ancora nei piccoli GeoJSON.
-      // Scarichiamo solo questi se mancano; non la grande mappa regionale.
-      final installed = await MapPackageManager.instance.isInstalled(package);
-      if (!installed) {
-        await MapPackageManager.instance.download(
-          package,
-          onProgress: (_) {},
+      if (!full) {
+        final label =
+            RegionMapManagerService.regionLabels[regionId] ?? regionId;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Scarica prima la mappa completa di $label.'),
+          ),
         );
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const MapManagerScreen()),
+        );
+        return;
       }
-      if (!mounted) return;
+
+      final mwm = await MwmMapService.instance.mapForPoint(point);
+      if (!context.mounted) return;
+
+      if (mwm == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Non trovo la mappa offline corretta per la posizione GPS.',
+            ),
+          ),
+        );
+        return;
+      }
 
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => MapScreen(
-            package: package,
+          builder: (_) => StartOverviewMapScreen(
             initialPosition: point,
+            regionLabel: mwm.regionLabel,
           ),
         ),
       );
     } catch (e) {
-      if (!mounted) return;
-
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text(
-            'GPS non disponibile',
-            style: TextStyle(fontWeight: FontWeight.w900),
-          ),
+      if (!context.mounted) return;
+      try {
+        Navigator.of(context, rootNavigator: true).pop();
+      } catch (_) {}
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
           content: Text(
             e.toString().replaceFirst('Exception: ', ''),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('OK'),
-            ),
-          ],
         ),
       );
-    } finally {
-      if (mounted) setState(() => _working = false);
     }
   }
 
-  void _plan() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const PlanningMapScreen()),
+  Future<void> _confirmExit(BuildContext context) async {
+    final exit = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(
+          'Uscire da GoTr-Ail?',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+        content: const Text('Vuoi veramente uscire dall\'app?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('ANNULLA'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('ESCI'),
+          ),
+        ],
+      ),
     );
-  }
 
-  void _savedRoutes() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const SavedRoutesScreen()),
-    );
+    if (exit == true) {
+      await SystemNavigator.pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-
-        final exit = await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text(
-              'Uscire da GoTr-AI?',
-              style: TextStyle(fontWeight: FontWeight.w900),
-            ),
-            content: const Text(
-              'Vuoi chiudere l’app?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () =>
-                    Navigator.pop(dialogContext, false),
-                child: const Text('NO'),
-              ),
-              FilledButton(
-                onPressed: () =>
-                    Navigator.pop(dialogContext, true),
-                child: const Text('ESCI'),
-              ),
-            ],
-          ),
-        );
-
-        if (exit == true && context.mounted) {
-          Navigator.of(context).pop();
-        }
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _confirmExit(context);
       },
       child: Scaffold(
-        body: Stack(
+      body: Stack(
         fit: StackFit.expand,
         children: [
           Image.asset(
             'assets/images/monte_pelmo.png',
             fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
           ),
-
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 26),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Spacer(),
-                  const Text(
-                    'GoTr-AI',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      shadows: [
-                        Shadow(
-                          color: Color(0x88000000),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    'Il tuo accompagnatore nei sentieri',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      shadows: [
-                        Shadow(
-                          color: Color(0x99000000),
-                          blurRadius: 7,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 26),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF4F9448),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      onPressed: _working ? null : _start,
-                      child: _working
-                          ? const SizedBox(
-                              width: 25,
-                              height: 25,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'INIZIA',
-                              style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF18539A),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                      ),
-                      onPressed: _working ? null : _plan,
-                      child: const Text('PIANIFICA', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900)),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xDDFFFFFF),
-                        foregroundColor: const Color(0xFF18539A),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: const BorderSide(color: Color(0xFF18539A), width: 1.4),
-                        ),
-                      ),
-                      onPressed: _working ? null : _savedRoutes,
-                      icon: const Icon(Icons.bookmarks_rounded),
-                      label: const Text(
-                        'PERCORSI SALVATI',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                      ),
-                    ),
-                  ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0x22000818),
+                  Color(0x55000818),
+                  Color(0xE6071725),
                 ],
+                stops: [0, .46, 1],
               ),
+            ),
+          ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final h = constraints.maxHeight;
+                final compact = h < 700;
+
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    18,
+                    compact ? 12 : 18,
+                    18,
+                    compact ? 12 : 18,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: compact ? 46 : 50,
+                            height: compact ? 46 : 50,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: .95),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: const Icon(
+                              Icons.terrain_rounded,
+                              color: _blue,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'GoTr-Ail',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    height: 1,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Il tuo accompagnatore nei sentieri',
+                                  style: TextStyle(
+                                    color: Color(0xFFEAF4FF),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Text(
+                            '11.7',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: compact ? 28 : 44),
+                      Text(
+                        'Dove vuoi andare?',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: compact ? 25 : 28,
+                          height: 1.05,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const Spacer(),
+
+                      // I due pulsanti principali sono volutamente più piccoli.
+                      _PrimaryAction(
+                        title: 'INIZIA',
+                        subtitle: 'Apri la mappa dalla tua posizione',
+                        icon: Icons.navigation_rounded,
+                        color: _green,
+                        onTap: () => _start(context),
+                      ),
+                      const SizedBox(height: 8),
+                      _PrimaryAction(
+                        title: 'MAPPE',
+                        subtitle: 'Gestisci le mappe offline',
+                        icon: Icons.map_rounded,
+                        color: _blue,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const MapManagerScreen(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Percorsi salvati resta, ma molto più compatto.
+                      SizedBox(
+                        width: double.infinity,
+                        height: 44,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const SavedRoutesScreen(),
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF172C43),
+                            side: const BorderSide(
+                              color: Colors.white,
+                              width: 1.2,
+                            ),
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.bookmark_rounded,
+                            size: 19,
+                          ),
+                          label: const Text(
+                            'PERCORSI SALVATI',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
+      ),
+    );
+  }
+}
+
+class _PrimaryAction extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _PrimaryAction({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(17),
+      elevation: 3,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(17),
+        child: SizedBox(
+          height: 64,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 13),
+            child: Row(
+              children: [
+                Container(
+                  width: 39,
+                  height: 39,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .20),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.2,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

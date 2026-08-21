@@ -1,0 +1,7 @@
+GoTr-Ail 8.0.1
+- Home invariata nel flow, pulsanti più grafici
+- Dalla seconda schermata sempre presente il pulsante HOME (utile su iPhone)
+- Nuova grafica "Cosa vuoi fare?" / "Dove vuoi andare?"
+- Nuova schermata "Come la vuoi?"
+- Cane, bambini, difficoltà, distanza indicativa e anello
+- CREA CON AI predisposto come prossimo passaggio

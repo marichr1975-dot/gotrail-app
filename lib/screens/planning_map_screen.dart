@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
@@ -8,11 +9,9 @@ import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_mbtiles/vector_map_tiles_mbtiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../models/map_package.dart';
 import '../services/location_search_service.dart';
-import '../services/map_manager.dart';
-import '../services/map_storage_service.dart';
-import 'map_screen.dart';
+import '../services/mwm_map_service.dart';
+import 'v8_choice_screen.dart';
 
 class PlanningMapScreen extends StatefulWidget {
   const PlanningMapScreen({super.key});
@@ -29,10 +28,14 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
   bool _preparing = true;
   bool _downloading = false;
   bool _searching = false;
+  List<LocationSearchResult> _suggestions = const [];
+  Timer? _suggestionDebounce;
+  int _suggestionRequestId = 0;
   String? _error;
-  int _receivedBytes = 0;
-  int _totalBytes = 0;
+  final int _receivedBytes = 0;
+  final int _totalBytes = 0;
   String _activeMapName = 'mappa';
+  LatLng _mapCenter = const LatLng(45.75, 11.85);
 
   @override
   void initState() {
@@ -41,8 +44,8 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
   }
 
   Future<void> _prepare() async {
-    // Non blocca l'apertura dell'app: se non c'è rete, continua con le mappe locali.
-    Future<void>(() => MapManager.instance.checkUpdatesInBackground());
+    // 8.8: niente aggiornamenti/download automatici all'apertura di Pianifica.
+    // Una MBTiles già presente (anche copiata via PowerShell) ha priorità.
     if (mounted) setState(() => _preparing = false);
   }
 
@@ -51,35 +54,44 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
     _mbtiles = MbTiles(mbtilesPath: file.path, gzip: true);
   }
 
-  Future<void> _goToPlace() async {
+  Future<void> _goToPlace([LocationSearchResult? selected]) async {
     final text = _search.text.trim();
-    if (text.isEmpty || _searching || _downloading) return;
+    if (text.isEmpty || _searching) return;
 
     FocusScope.of(context).unfocus();
     setState(() {
       _searching = true;
       _error = null;
+      _suggestions = const [];
     });
 
     try {
-      final found = await LocationSearchService.instance.search(text);
+      final found = selected ?? await LocationSearchService.instance.search(text);
       if (!mounted) return;
 
       if (found == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Non trovo "$text".')),
+          SnackBar(content: Text('Non riesco a identificare "$text" nelle regioni disponibili. Controlla il nome e la connessione Internet.')),
         );
         return;
       }
 
-      final availableMap = await MapManager.instance.mapForPoint(found.point);
+      // V10.5 nuova: Pianifica NON scarica mappe.
+      // Usa esclusivamente quelle scelte prima dall'utente nel menu Mappe.
+      final mapSearchText = '${found.label} ${found.mapHint}'.trim();
+      final mwm = await MwmMapService.instance.mapForTextAndPoint(
+        mapSearchText,
+        found.point,
+      );
       if (!mounted) return;
 
-      if (availableMap == null) {
+      if (mwm == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            duration: const Duration(seconds: 7),
             content: Text(
-              'Località trovata (${found.label}), ma non c’è ancora una mappa offline pubblicata per questa zona.',
+              'Ho trovato ${found.label}, ma la mappa della sua provincia/regione non è installata. '
+              'Non userò una mappa di un’altra zona. Apri Mappe dalla Home e scarica la regione.',
             ),
           ),
         );
@@ -87,67 +99,65 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
       }
 
       setState(() {
-        _activeMapName = availableMap.name;
-        _downloading = true;
-        _receivedBytes = 0;
-        _totalBytes = 0;
+        _activeMapName = mwm.regionLabel;
+        _mapCenter = found.point;
+        _downloading = false;
       });
 
-      final resolved = await MapManager.instance.ensureMapForPoint(
-        found.point,
-        onProgress: (MapDownloadProgress progress) {
-          if (!mounted) return;
-          setState(() {
-            _receivedBytes = progress.receivedBytes;
-            _totalBytes = progress.totalBytes;
-          });
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${mwm.regionLabel} MWM pronta · ${mwm.sizeLabel}')),
       );
-
-      if (!mounted) return;
-      _openMbTiles(resolved.file);
-      setState(() => _downloading = false);
-
-      // Le 4 funzioni usano ancora, temporaneamente, i piccoli pacchetti dati
-      // GeoJSON esistenti. MapScreen li scarica da sola se mancanti.
-      final dataPackage = MapCatalog.packageFor(found.point);
-      if (dataPackage == null) {
-        _mapController.move(found.point, 13.5);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Mappa disponibile. I dati Sentieri/Parcheggi/Fontane/Rifugi non sono ancora pubblicati per questa zona.',
-            ),
-          ),
-        );
-        return;
-      }
 
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => MapScreen(
-            package: dataPackage,
-            initialPosition: found.point,
-            useGps: false,
+          builder: (_) => V8ChoiceScreen(
+            mode: V8Mode.plan,
+            initialPlace: found.label,
+            targetPoint: found.point,
+            targetLabel: found.label,
           ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.toString().replaceFirst('Exception: ', '');
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_error!)),
-      );
+      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_error!)));
     } finally {
-      if (mounted) {
-        setState(() {
-          _searching = false;
-          _downloading = false;
-        });
-      }
+      if (mounted) setState(() => _searching = false);
     }
+  }
+
+
+  void _updateSuggestions(String value) {
+    _suggestionDebounce?.cancel();
+    final query = value.trim();
+    final requestId = ++_suggestionRequestId;
+
+    if (query.length < 2) {
+      if (_suggestions.isNotEmpty) {
+        setState(() => _suggestions = const []);
+      }
+      return;
+    }
+
+    _suggestionDebounce = Timer(const Duration(milliseconds: 650), () async {
+      try {
+        final results = await LocationSearchService.instance
+            .intelligentSuggestions(query, limit: 5);
+        if (!mounted || requestId != _suggestionRequestId) return;
+        setState(() => _suggestions = results);
+      } catch (_) {
+        if (!mounted || requestId != _suggestionRequestId) return;
+        setState(() => _suggestions = const []);
+      }
+    });
+  }
+
+  Future<void> _useSuggestion(LocationSearchResult result) async {
+    _search.text = result.label;
+    _search.selection = TextSelection.collapsed(offset: _search.text.length);
+    setState(() => _suggestions = const []);
+    await _goToPlace(result);
   }
 
   Theme _theme() => ThemeReader().read({
@@ -275,6 +285,7 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
 
   @override
   void dispose() {
+    _suggestionDebounce?.cancel();
     _search.dispose();
     _mbtiles?.dispose();
     super.dispose();
@@ -288,9 +299,9 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
           if (_mbtiles != null)
             FlutterMap(
               mapController: _mapController,
-              options: const MapOptions(
-                initialCenter: LatLng(45.75, 11.85),
-                initialZoom: 8.2,
+              options: MapOptions(
+                initialCenter: _mapCenter,
+                initialZoom: 13.5,
                 minZoom: 7,
                 maxZoom: 18,
               ),
@@ -327,7 +338,7 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            'Cerca una località. GoTr-AI individua automaticamente la mappa disponibile per quelle coordinate e, se serve, la scarica per l’uso offline.',
+                            'Cerca una località o un punto noto. GoTr-AI userà soltanto le mappe che hai già scaricato dal menu Mappe.',
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 14, height: 1.35),
                           ),
@@ -356,35 +367,89 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
                   ),
                   const SizedBox(width: 9),
                   Expanded(
-                    child: Material(
-                      color: Colors.white,
-                      elevation: 4,
-                      borderRadius: BorderRadius.circular(18),
-                      child: TextField(
-                        controller: _search,
-                        enabled: !_downloading && !_searching,
-                        textInputAction: TextInputAction.search,
-                        onSubmitted: (_) => _goToPlace(),
-                        decoration: InputDecoration(
-                          hintText: 'Dove vuoi andare?',
-                          prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF18539A)),
-                          suffixIcon: _searching
-                              ? const Padding(
-                                  padding: EdgeInsets.all(14),
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2.4),
-                                  ),
-                                )
-                              : IconButton(
-                                  onPressed: _downloading ? null : _goToPlace,
-                                  icon: const Icon(Icons.arrow_forward_rounded),
-                                ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Material(
+                          color: Colors.white,
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(18),
+                          child: TextField(
+                            controller: _search,
+                            enabled: !_downloading && !_searching,
+                            textInputAction: TextInputAction.search,
+                            onChanged: _updateSuggestions,
+                            onSubmitted: (_) => _goToPlace(),
+                            decoration: InputDecoration(
+                              hintText: 'Dove vuoi andare?',
+                              prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF18539A)),
+                              suffixIcon: _searching
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(14),
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2.4),
+                                      ),
+                                    )
+                                  : IconButton(
+                                      onPressed: _downloading ? null : _goToPlace,
+                                      icon: const Icon(Icons.arrow_forward_rounded),
+                                    ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
                         ),
-                      ),
+                        if (_suggestions.isNotEmpty)
+                          Container(
+                            margin: const EdgeInsets.only(top: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x22000000),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: _suggestions.map((result) {
+                                return InkWell(
+                                  onTap: () => _useSuggestion(result),
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.place_rounded,
+                                          color: Color(0xFF18539A),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 9),
+                                        Expanded(
+                                          child: Text(
+                                            result.label,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 13.5,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(growable: false),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -403,7 +468,7 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
-                  'Ricerca © OpenStreetMap contributors',
+                  'Ricerca località assistita da Gemini',
                   style: TextStyle(fontSize: 9, color: Colors.black54),
                 ),
               ),
@@ -443,3 +508,4 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
     );
   }
 }
+

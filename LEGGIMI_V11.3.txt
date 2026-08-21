@@ -1,0 +1,17 @@
+GoTr-Ail V11.3
+
+NOVITA PRINCIPALI
+- Home: il tasto Indietro non chiude più l'app subito. Chiede conferma ANNULLA / ESCI.
+- Menu "Cosa vuoi fare?": ordine Passeggiata, Rifugi, Cascate, Fontane.
+- "Sentiero nel bosco" non è più una categoria principale: Bosco resta tra le preferenze Passeggiata.
+- Rifugi / Cascate / Fontane mostrano il numero di elementi reali trovati entro 10 km.
+- Premendo una categoria si apre la lista reale ordinata per distanza.
+- INIZIA usa il punto GPS; PIANIFICA usa esattamente le coordinate della località cercata.
+- Ricerca POI: priorità al bridge Organic Maps/MWM locale. Se il bridge nativo non restituisce ancora dati, V11.3 usa OSM Overpass come fallback reale online. Se anche quello non è disponibile, mostra 0 invece di inventare risultati.
+
+TEST CONSIGLIATO
+1. Avviare con: flutter run --dart-define-from-file=gemini.json
+2. PIANIFICA -> Auronzo di Cadore.
+3. Verificare i numeri Rifugi/Cascate/Fontane entro 10 km.
+4. Aprire Rifugi e verificare nomi + distanza.
+5. Tornare alla Home e premere Indietro: deve apparire la conferma uscita.

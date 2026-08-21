@@ -1,0 +1,32 @@
+GoTr-AI V9.4 MWM TEST
+======================
+
+OBIETTIVO
+- V9.3 resta congelata.
+- Questa 9.4 prova la presenza e leggibilita' della mappa Organic Maps .mwm di Venezia insieme al GPS.
+- Non modifica Gemini e non attiva ancora navigazione/routing MWM.
+
+CARTELLA APP ATTESA
+app_flutter/gotr_mwm/Italy_Veneto_Venezia.mwm
+
+DOPO AVER INSTALLATO/APERTO LA 9.4 UNA VOLTA:
+
+1) Copia il file dal PC al Download del J6 (se non e' gia' li):
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" push "C:\PERCORSO\Italy_Veneto_Venezia.mwm" /sdcard/Download/Italy_Veneto_Venezia.mwm
+
+2) Crea la cartella privata:
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" shell "run-as com.example.gotr_ai mkdir -p app_flutter/gotr_mwm"
+
+3) Copia la MWM dentro GoTr-AI:
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" shell "run-as com.example.gotr_ai cp /sdcard/Download/Italy_Veneto_Venezia.mwm app_flutter/gotr_mwm/Italy_Veneto_Venezia.mwm"
+
+4) Verifica:
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" shell "run-as com.example.gotr_ai ls -lh app_flutter/gotr_mwm"
+
+TEST
+- Apri GoTr-AI.
+- Premi INIZIA.
+- Se GPS e file sono corretti compare il dialogo "MWM PRONTA" con Venezia, dimensione file e coordinate GPS.
+
+NOTA TECNICA
+Il formato .mwm contiene dati per rendering, ricerca e routing, ma il parsing semantico richiede il core Organic Maps compatibile. Questa 9.4 e' volutamente un test sicuro di integrazione file+GPS, non un falso parser MWM.

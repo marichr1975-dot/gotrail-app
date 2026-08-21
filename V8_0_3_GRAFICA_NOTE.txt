@@ -1,0 +1,8 @@
+GoTr-Ail 8.0.3 - GRAFICA COMPLETA
+- Flow V8 invariato
+- Tutto a vista, nessuno scroll nelle schermate principali
+- HOME ridisegnata con pannello elegante e pulsanti descrittivi
+- Scelta esperienza con card grafiche e colori distinti
+- Preferenze più leggibili con sezioni, icone e selezioni evidenti
+- Casetta HOME sempre presente dalla seconda schermata
+- Nessuna modifica alla parte mappa: prossimo step dedicato

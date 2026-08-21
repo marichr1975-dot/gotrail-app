@@ -1,0 +1,16 @@
+GoTr-Ail V11.2
+
+Base: V11.1 definitiva, lasciata intatta.
+
+Modifiche:
+- Barra della schermata mappa: ora dice soltanto "Cerca località".
+- La mappa operativa usa una base topografica più orientata all'escursionismo.
+- Sovrapposizione dei percorsi escursionistici marcati per renderli più evidenti.
+- Zoom iniziale aumentato: i sentieri sono visibili più da vicino e con maggiore dettaglio.
+- Dopo la scelta di una località, la mappa entra a zoom 16.8 anziché 15.x.
+- Lo stesso stile cartografico viene usato anche nelle mappe percorso principali.
+
+NOTA IMPORTANTE:
+Questa V11.2 migliora il rendering VISIVO delle mappe online.
+Non è ancora il renderer nativo MWM di Organic Maps. La V11.1 resta il punto sicuro.
+Per una resa identica a Organic Maps servirà integrare il loro renderer nativo MWM.

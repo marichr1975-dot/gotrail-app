@@ -1,10 +1,13 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'screens/home_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const GoTrApp());
 }
 
@@ -13,16 +16,17 @@ class GoTrApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const blue = Color(0xFF0C5FA8);
+    const green = Color(0xFF2E8B57);
     return MaterialApp(
-      title: 'GoTr-AI 6.5',
+      title: 'GoTr-Ail 11.3',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4F9448),
-        ),
         useMaterial3: true,
-        scaffoldBackgroundColor:
-            const Color(0xFFF7F6F2),
+        colorScheme: ColorScheme.fromSeed(seedColor: blue).copyWith(
+          primary: blue,
+          secondary: green,
+        ),
       ),
       home: const HomeScreen(),
     );

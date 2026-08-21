@@ -1,0 +1,6 @@
+GoTr-AI V9_AI_1
+Base: V9 stabile invariata.
+Modifica unica: pulsante CREA CON AI collegato a Gemini API.
+La chiave NON è inclusa nel progetto e va passata con --dart-define.
+Questa prima integrazione AI decide il profilo del percorso; non inventa una geometria/traccia.
+Passo successivo: far scegliere a Gemini tra candidati reali estratti dalla mappa offline.

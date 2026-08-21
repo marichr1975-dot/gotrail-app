@@ -1,7 +1,7 @@
 name: gotr_ai_3_0
-description: GoTr-AI 6.9 - percorsi salvati e navigazione offline
+description: GoTr-AI V9.4 MWM TEST - GPS + file MWM Venezia
 publish_to: 'none'
-version: 6.9.0+37
+version: 11.7.0+117
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -23,7 +23,6 @@ dependencies:
   vector_map_tiles_mbtiles: ^1.2.0
   vector_tile_renderer: ^5.2.1
   camera: ^0.11.2
-  camera_android: ^0.10.10+18
 
 dev_dependencies:
   flutter_test:

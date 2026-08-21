@@ -1,0 +1,16 @@
+GoTr-Ail V11.1
+
+Correzioni:
+- Freccia GPS: calibrazione J6 -7° sulla direzione della testa del telefono.
+- Bussola rossa separata dalla freccia GPS e ancora riferita al Nord vero.
+- "Rifugio Auronzo" non viene più ridotto automaticamente alla località "Auronzo".
+  Le ricerche con parole POI (rifugio, ristorante, malga, cascata, fontana, ecc.)
+  passano prima al motore Organic; finché il bridge nativo non risponde usano
+  la risoluzione AI, senza fallback alla sola città.
+- Percorso ad anello completamente rivisto: lo start è sulla circonferenza,
+  non al centro; vengono provati più orientamenti e scartati i percorsi
+  troppo sovrapposti o non realmente chiusi.
+- Se non si trova un anello valido, l'app lo dichiara invece di mostrare
+  una falsa "stella".
+- "Come vuoi il percorso?": Indietro a sinistra, Home a destra.
+- Home, Mappe e ricerca località approvate restano invariate.

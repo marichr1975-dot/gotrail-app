@@ -1,0 +1,8 @@
+GoTr-AI V9
+
+- Grafica della 8.9 invariata.
+- INIZIA acquisisce una posizione GPS reale prima di aprire le scelte.
+- Catalogo mappe offline-first: Veneto disponibile subito senza attesa rete.
+- veneto.mbtiles copiato in app_flutter/gotr_maps viene riconosciuto.
+- PIANIFICA non usa MapController prima del rendering della FlutterMap.
+- Ricerca Auronzo e localita indice locale resta disponibile offline.

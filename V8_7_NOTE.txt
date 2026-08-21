@@ -1,0 +1,8 @@
+GoTr-AI 8.7
+
+FIX PIANIFICA
+- Grafica 8.6 mantenuta invariata.
+- Il pulsante PIANIFICA ora apre la schermata di pianificazione reale (PlanningMapScreen) già presente nel progetto, con ricerca località e mappa.
+- INIZIA continua a usare il nuovo flusso grafico 8.6.
+- SALVATI invariato.
+- Nessuna modifica ai servizi mappe/offline.

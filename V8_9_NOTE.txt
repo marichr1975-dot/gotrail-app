@@ -1,0 +1,6 @@
+GoTr-AI 8.9
+- Grafica 8.8 mantenuta.
+- Rimossa la scritta/badge OFFLINE dalla Home.
+- Pianifica: Auronzo e principali località venete/dolomitiche vengono risolte da un piccolo indice locale senza Internet.
+- Ricerca online Nominatim resta come fallback per località non presenti nell'indice locale, con timeout ridotto a 5 s e senza mostrare TimeoutException grezza.
+- veneto.mbtiles già installata resta prioritaria tramite MapManager/MapStorageService.

@@ -33,6 +33,13 @@ class MapManager {
       throw Exception('Nessuna mappa disponibile per questa zona.');
     }
 
+    // 8.8: se la MBTiles è già presente localmente, usala SEMPRE.
+    // Questo permette anche le mappe copiate manualmente via ADB/PowerShell
+    // e impedisce di riscaricare Veneto quando veneto.mbtiles è già installata.
+    if (await MapStorageService.instance.isInstalled(map)) {
+      return ResolvedMap(map, await MapStorageService.instance.fileFor(map));
+    }
+
     final file = await MapStorageService.instance.ensureInstalled(
       map,
       onProgress: onProgress,

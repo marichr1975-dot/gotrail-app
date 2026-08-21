@@ -1,0 +1,56 @@
+name: Build iOS V11.7 IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ios-v11.7
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter doctor
+        run: flutter doctor -v
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: CocoaPods
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Build iOS app without signing
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=GEMINI_API_KEY="$GEMINI_API_KEY"
+
+      - name: Package unsigned IPA
+        run: |
+          rm -rf build/ipa_unsigned
+          mkdir -p build/ipa_unsigned/Payload
+          cp -R build/ios/iphoneos/Runner.app build/ipa_unsigned/Payload/
+          cd build/ipa_unsigned
+          zip -qry ../GoTr-Ail-V11.7-iOS-unsigned.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-V11.7-iOS-unsigned
+          path: build/GoTr-Ail-V11.7-iOS-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14

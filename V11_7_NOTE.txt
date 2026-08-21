@@ -1,0 +1,7 @@
+GoTr-Ail V11.7
+- Riepilogo rifugio/cascata compattato per stare in una schermata sul J6.
+- Ridotti i box Distanza/Tempo e l'altimetria per eliminare gli overflow.
+- Pulsante INIZIA visibile senza dover scorrere.
+- Fontane in PIANIFICA: mappa centrata sulla località scelta con zoom iniziale circa 1 km.
+- Rimossa la visualizzazione iniziale di tutte le fontane insieme.
+- Rimossa completamente l'icona/pulsante GPS dalla mappa fontane.

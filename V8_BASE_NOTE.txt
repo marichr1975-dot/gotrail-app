@@ -1,0 +1,13 @@
+GoTr-Ail 8.0 - base di lavoro
+
+Base separata per la nuova V8.
+
+Obiettivi:
+- HOME: INIZIA / PIANIFICA / PERCORSI SALVATI
+- INIZIA -> Cosa vuoi fare?
+- PIANIFICA -> Dove vuoi andare?
+- AI-first con proposte multiple
+- Anteprima del percorso scelto
+- Navigazione minimale: traccia + freccia GPS
+- Motore MWM/Organic Maps come backend invisibile
+- La V7 NATIVE MWM funzionante resta intatta sul PC

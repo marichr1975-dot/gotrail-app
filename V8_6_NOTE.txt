@@ -1,0 +1,6 @@
+GoTr-AI 8.6
+- Home semplificata: Inizia / Pianifica / Salvati.
+- Prima schermata: Passeggiata / Rifugio / Sentiero nel bosco / Cascata / Fontane.
+- Seconda schermata unica e compatta: 2/4/6 km, difficolta, cane, bambini, bosco, roccia, anello, CREA CON AI.
+- Layout adattivo per schermi piccoli (Samsung J6) per evitare overflow.
+- Logica mappe/offline non modificata.

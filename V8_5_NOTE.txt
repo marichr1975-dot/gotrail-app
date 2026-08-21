@@ -1,0 +1,3 @@
+GoTr-AI 8.5
+Nuova grafica reale su Home, scelta esperienza e preferenze.
+Funzioni mappe/offline lasciate invariate.

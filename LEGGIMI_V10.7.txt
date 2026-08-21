@@ -1,0 +1,16 @@
+GoTr-Ail V10.7
+
+Modifiche rispetto alla V10.6:
+- Home Pelmo sempre prima schermata.
+- Versione visibile 10.7.
+- INIZIA e MAPPE ridotti e senza overflow sul J6.
+- PERCORSI SALVATI mantenuto come pulsante compatto.
+- Testo Mappe offline ripulito.
+- INIZIA sulla mappa più piccolo.
+- Bussola ridisegnata: freccia rossa indica il Nord usando il sensore bussola.
+- Freccia GPS usa l'heading del telefono; in movimento usa il course GPS come fallback.
+- Ricerca locale corretta: digitando esattamente Auronzo la mappa si sposta subito su Auronzo di Cadore.
+- Suggerimenti locali restano visibili; Organic Maps resta predisposto come motore definitivo.
+
+IMPORTANTE:
+Il vero motore nativo Organic Maps non è ancora integrato in questa build.

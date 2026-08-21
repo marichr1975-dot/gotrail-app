@@ -1,0 +1,12 @@
+GoTr-Ail V9.7
+
+Base: V9.6 MWM-only.
+Modifica: solo schermata Home.
+- GoTr-Ail
+- slogan: Il tuo accompagnatore nei sentieri
+- rimosso Dove vuoi andare oggi? e sottotitolo
+- Inizia verde
+- Pianifica blu
+- Salvati bianco
+- nessuna modifica alla logica MWM / GPS / pianificazione
+- package/app-id invariato per mantenere i dati locali durante aggiornamento

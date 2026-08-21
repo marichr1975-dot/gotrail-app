@@ -1,0 +1,13 @@
+GoTr-Ail V11.6 - RIFATTA DA V11.5 CORRETTA
+
+- Non usa la precedente 11.6 difettosa.
+- Home aggiornata a 11.6.
+- Fontane PIANIFICA: solo mappa, mai navigazione automatica.
+- Fontane INIZIA: prima legge il GPS reale.
+  Se il GPS è oltre 10 km dalla zona cercata, mostra solo la mappa.
+  Solo se il GPS è realmente nella zona propone PORTAMI.
+- Pulsante GPS sulla mappa fontane porta alla posizione GPS reale del telefono.
+- Riepilogo rifugio/cascata rifatto:
+  mappa OSM reale + sentieri, traccia, parcheggio, meta,
+  distanza, tempo stimato e altimetria chiara.
+- Layout senza overflow sul J6; scroll solo come sicurezza.

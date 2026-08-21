@@ -64,7 +64,7 @@ class _ActionsScreenState extends State<ActionsScreen> {
           context: context,
           barrierDismissible: false,
           builder: (_) => MapDownloadDialog(
-            package: package!,
+            package: package,
           ),
         );
 
@@ -74,7 +74,7 @@ class _ActionsScreenState extends State<ActionsScreen> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => MapScreen(
-            package: package!,
+            package: package,
             initialPosition: position,
           ),
         ),

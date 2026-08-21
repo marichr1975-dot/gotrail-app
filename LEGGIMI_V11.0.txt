@@ -1,0 +1,8 @@
+GoTr-Ail V11.0
+
+- Mantiene Home e Mappe della V10.9, già approvate.
+- Ricerca località e passaggio del luogo (Agordo/Falcade ecc.) invariati.
+- Freccia GPS: ora usa il valore raw della bussola del telefono senza la correzione di declinazione, per allinearsi alla testa del telefono.
+- Bussola in alto a destra: mantiene la correzione verso il Nord vero.
+- Schermata "Cosa vuoi fare?": Indietro in alto a sinistra, Home in alto a destra.
+- Schermata "Come vuoi il percorso?": Indietro in alto a sinistra, Home in alto a destra.

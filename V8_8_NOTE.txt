@@ -1,0 +1,7 @@
+GoTr-AI 8.8
+
+- Mantiene la grafica Home della 8.6/8.7.
+- INIZIA: prima schermata ripulita; solo 5 scelte reali (Passeggiata, Rifugio, Sentiero nel bosco, Cascata, Fontane), senza riquadri/testi decorativi strani.
+- PIANIFICA: se veneto.mbtiles è già presente in app_flutter/gotr_maps, la usa direttamente e NON la riscarica.
+- Tolto il controllo aggiornamenti automatico all'apertura di Pianifica, per non sovrascrivere/riscaricare la mappa caricata via PowerShell.
+- Dopo la scelta della località, Pianifica entra nello stesso flusso grafico pulito: cosa vuoi fare -> preferenze -> Crea con AI.

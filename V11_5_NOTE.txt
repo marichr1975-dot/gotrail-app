@@ -1,0 +1,9 @@
+GoTr-Ail V11.5
+- Schermata Cosa vuoi fare: rimossi i sottotitoli sotto Passeggiata/Rifugi/Cascate/Fontane.
+- Riepilogo Rifugio/Cascata compatto in un'unica schermata.
+- Mappa adattata automaticamente all'intera traccia.
+- Rimossa la riga Partenza/parcheggio.
+- Restano lunghezza sentiero e arrivo.
+- Aggiunto profilo altimetrico reale con quota min/max e dislivello positivo.
+- Fontane in PIANIFICA: mappa grande con tutte le fontane come icone.
+- Fontane in INIZIA/GPS: propone direttamente la fontana più vicina e, con PORTAMI, avvia la navigazione.

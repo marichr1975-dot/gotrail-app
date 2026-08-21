@@ -1,0 +1,10 @@
+GoTr-Ail V10.9
+
+Correzioni:
+- Home: INIZIA completamente verde, MAPPE completamente blu, PERCORSI SALVATI completamente bianco.
+- Mappe offline: font, icone, spazi e pulsanti ridotti per mostrare insieme Veneto, Trentino-Alto Adige e Friuli-Venezia Giulia sul J6.
+- Bussola mantenuta e heading GPS/telefono corretto di circa 4 gradi per la differenza Nord magnetico / Nord vero nell'area di test.
+- Schermata preferenze cane/bambini: Home resta a sinistra; il vecchio simbolo regolazioni a destra è sostituito da INDIETRO.
+- Ricerca: quando scegli o digiti esattamente una località nota (es. Falcade), il successivo INIZIA porta quella località fino a Gemini.
+- Se non selezioni una località nella ricerca, INIZIA continua a usare la posizione GPS.
+- Versione 10.9.0+109.

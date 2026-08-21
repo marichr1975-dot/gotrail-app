@@ -1,0 +1,6 @@
+GoTr-Ail 8.0.2 - TUTTO A VISTA
+- Niente scrolling nelle schermate Cosa vuoi fare / Dove vuoi andare
+- Niente scrolling nella schermata Come la vuoi
+- Pulsanti grandi e leggibili
+- Casetta HOME sempre presente dalla seconda schermata
+- Pensata per utilizzo semplice anche da parte di utenti anziani

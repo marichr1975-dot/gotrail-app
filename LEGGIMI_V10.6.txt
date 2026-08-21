@@ -1,0 +1,12 @@
+V10.6 corretta:
+- Home Pelmo SEMPRE come prima schermata.
+- Pulsanti Home ridotti per J6, niente overflow.
+- INIZIA verde e MAPPE blu.
+- Testo Mappe offline ripulito per l'utente.
+- Schermata mappa bloccata verticale.
+- Bussola con N visibile e indicazione heading.
+- Freccia GPS orientata con bussola; fallback sulla direzione GPS quando ci si muove.
+- Ricerca: il ponte Organic Maps resta predisposto; finché il plugin nativo Organic non è collegato usa anche l'indice locale esistente, quindi Auronzo reagisce già e sposta la mappa.
+- Pulsante INIZIA continua nel flow già esistente.
+
+Copia il tuo gemini.json nella cartella del progetto dopo la sovrascrittura.

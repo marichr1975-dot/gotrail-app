@@ -1,0 +1,5 @@
+GoTr-Ail V11.4
+- Rifugi: rimossi shelter generici per evitare falsi positivi in pianura.
+- Rifugio/Cascata: scelta -> parcheggio pubblico più vicino -> traccia singola -> riepilogo -> INIZIA.
+- Fontana: scelta -> conferma PORTAMI -> navigazione diretta.
+- Rimossa la scritta tecnica Bridge Organic/OSM dall'interfaccia.

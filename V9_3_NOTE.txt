@@ -1,0 +1,9 @@
+GoTr-AI V9.3
+
+- Base: V9.2 / FIX2, GPS e Gemini invariati.
+- Corretto overflow verticale nella schermata preferenze su telefoni piccoli: il contenuto centrale ora scorre.
+- Schermata Proposta AI resa più compatta e pulita.
+- Rimossa la nota TEST AI 1 dalla UI utente.
+- Versione: 9.3.0+43.
+
+La V9 stabile resta il punto di ripristino.
