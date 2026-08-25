@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -47,9 +47,9 @@ class NearbyPoiSnapshot {
 
 /// Scansione POI reale entro un raggio.
 ///
-/// Priorità V11.3:
+/// PrioritÃ  V11.3:
 /// 1) bridge Organic Maps/MWM locale;
-/// 2) se il bridge nativo non è ancora disponibile, fallback OSM Overpass.
+/// 2) se il bridge nativo non Ã¨ ancora disponibile, fallback OSM Overpass.
 ///
 /// Il fallback non inventa risultati: se non riesce a leggere dati reali,
 /// restituisce zero elementi.
@@ -64,12 +64,15 @@ class NearbyPoiService {
     double radiusKm = _radiusKm,
   }) async {
     final organicItems = await _scanOrganic(center, radiusKm);
-    final organicCount = organicItems.values.fold<int>(
-      0,
-      (sum, list) => sum + list.length,
+
+    // V11.88: non basta trovare "qualcosa" con Organic Maps.
+    // Se una categoria e vuota (es. rifugi presenti ma cascate = 0),
+    // proviamo il fallback OSM SOLO per completare le categorie mancanti.
+    final missingCategory = NearbyPoiCategory.values.any(
+      (category) => organicItems[category]?.isEmpty ?? true,
     );
 
-    if (organicCount > 0) {
+    if (!missingCategory) {
       return NearbyPoiSnapshot(
         items: organicItems,
         usedOrganic: true,
@@ -80,12 +83,35 @@ class NearbyPoiService {
     }
 
     final online = await _scanOverpass(center, radiusKm);
+    final merged = <NearbyPoiCategory, List<NearbyPoi>>{};
+
+    for (final category in NearbyPoiCategory.values) {
+      final organic = List<NearbyPoi>.from(
+        organicItems[category] ?? const <NearbyPoi>[],
+      );
+      final fallback = online.items[category] ?? const <NearbyPoi>[];
+
+      if (organic.isEmpty) {
+        merged[category] = List<NearbyPoi>.from(fallback);
+      } else {
+        merged[category] = organic;
+      }
+    }
+
+    _sortHutsByPriority(merged[NearbyPoiCategory.hut]!);
+
     return NearbyPoiSnapshot(
-      items: online.items,
-      usedOrganic: false,
-      usedOnlineFallback: online.ok,
-      sourceAvailable: online.ok,
-      sourceMessage: online.message,
+      items: merged,
+      usedOrganic: organicItems.values.any((list) => list.isNotEmpty),
+      usedOnlineFallback: online.ok &&
+          NearbyPoiCategory.values.any(
+            (category) =>
+                (organicItems[category]?.isEmpty ?? true) &&
+                (online.items[category]?.isNotEmpty ?? false),
+          ),
+      sourceAvailable:
+          organicItems.values.any((list) => list.isNotEmpty) || online.ok,
+      sourceMessage: online.ok ? 'Organic Maps + OpenStreetMap' : 'Organic Maps',
     );
   }
 
@@ -100,9 +126,21 @@ class NearbyPoiService {
     };
 
     final searches = <NearbyPoiCategory, List<String>>{
-      NearbyPoiCategory.hut: const ['rifugio', 'malga', 'baita'],
-      NearbyPoiCategory.waterfall: const ['cascata'],
-      NearbyPoiCategory.drinkingWater: const ['fontana', 'acqua potabile'],
+      NearbyPoiCategory.hut: const [
+        'rifugio',
+        'malga',
+        'baita',
+        'bivacco',
+      ],
+      NearbyPoiCategory.waterfall: const [
+        'cascata',
+        'cascate',
+        'waterfall',
+      ],
+      NearbyPoiCategory.drinkingWater: const [
+        'fontana',
+        'acqua potabile',
+      ],
     };
 
     for (final entry in searches.entries) {
@@ -135,7 +173,13 @@ class NearbyPoiService {
           );
         }
       }
-      result[entry.key]!.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+      if (entry.key == NearbyPoiCategory.hut) {
+        _sortHutsByPriority(result[entry.key]!);
+      } else {
+        result[entry.key]!.sort(
+          (a, b) => a.distanceKm.compareTo(b.distanceKm),
+        );
+      }
     }
 
     return result;
@@ -159,6 +203,8 @@ class NearbyPoiService {
   nwr(around:$radiusM,$lat,$lon)[tourism="alpine_hut"];
   nwr(around:$radiusM,$lat,$lon)[tourism="wilderness_hut"];
   nwr(around:$radiusM,$lat,$lon)[natural="waterfall"];
+  nwr(around:$radiusM,$lat,$lon)[waterway="waterfall"];
+  nwr(around:$radiusM,$lat,$lon)[tourism="viewpoint"][name~"cascat|waterfall",i];
   nwr(around:$radiusM,$lat,$lon)[amenity="drinking_water"];
   nwr(around:$radiusM,$lat,$lon)[amenity="fountain"][drinking_water!="no"];
   nwr(around:$radiusM,$lat,$lon)[man_made="water_tap"][drinking_water!="no"];
@@ -369,7 +415,7 @@ out center tags qt;''';
         result.add(
           NearbyPoi(
             name: name,
-            subtitle: 'Parcheggio · ${km.toStringAsFixed(1)} km dalla meta',
+            subtitle: 'Parcheggio Â· ${km.toStringAsFixed(1)} km dalla meta',
             point: point,
             category: NearbyPoiCategory.hut,
             distanceKm: km,
@@ -389,7 +435,13 @@ out center tags qt;''';
     if (tourism == 'alpine_hut' || tourism == 'wilderness_hut') {
       return NearbyPoiCategory.hut;
     }
-    if (tags['natural']?.toString() == 'waterfall') {
+    final natural = tags['natural']?.toString().toLowerCase();
+    final waterway = tags['waterway']?.toString().toLowerCase();
+    final name = tags['name']?.toString().toLowerCase() ?? '';
+    if (natural == 'waterfall' ||
+        waterway == 'waterfall' ||
+        (tourism == 'viewpoint' &&
+            (name.contains('cascat') || name.contains('waterfall')))) {
       return NearbyPoiCategory.waterfall;
     }
     final amenity = tags['amenity']?.toString();
@@ -429,6 +481,22 @@ out center tags qt;''';
     }
   }
 
+  void _sortHutsByPriority(List<NearbyPoi> list) {
+    int priority(NearbyPoi poi) {
+      final text = '${poi.name} ${poi.subtitle}'.toLowerCase();
+      if (text.contains('bivacc')) return 3;
+      if (text.contains('malga') || text.contains('baita')) return 2;
+      if (text.contains('rifug') || text.contains('alpine_hut')) return 0;
+      return 1;
+    }
+
+    list.sort((a, b) {
+      final byType = priority(a).compareTo(priority(b));
+      if (byType != 0) return byType;
+      return a.distanceKm.compareTo(b.distanceKm);
+    });
+  }
+
   String _dedupeKey(String name, LatLng point) =>
       '${name.trim().toLowerCase()}|${point.latitude.toStringAsFixed(5)}|${point.longitude.toStringAsFixed(5)}';
 
@@ -437,3 +505,9 @@ out center tags qt;''';
     return double.tryParse(value?.toString() ?? '');
   }
 }
+
+
+
+
+
+

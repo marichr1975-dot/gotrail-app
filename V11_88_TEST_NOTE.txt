@@ -1,0 +1,10 @@
+﻿GoTr-Ail V11.88 TEST
+=====================
+Base: V11.8 TEST RICERCA funzionante.
+
+Modifiche:
+- Ricerca localita GeoNames lasciata invariata.
+- Cascate: fallback per categoria, query Organic ampliate e tipi OSM aggiuntivi.
+- Rifugi: raggio 10 km invariato; rifugi prima, malghe/baite dopo, bivacchi in fondo.
+- Ricerca localita: risultati in lista scrollabile; trascinando la lista la tastiera si chiude.
+- V11.8 originale sul PC non viene modificata.
