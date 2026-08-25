@@ -1,0 +1,7 @@
+GoTr-Ail V11.8 TEST RICERCA - iPhone
+
+- Ricerca localita Veneto completamente offline: nessuna chiamata Gemini.
+- Indice GeoNames Veneto: 7.857 localita.
+- Testo su iOS aumentato globalmente del 25 percento.
+- Android mantiene la scala testo originale.
+- Vecchio codice AI percorso non eliminato in questa build per non alterare altre funzioni; la ricerca localita non lo usa.

@@ -468,7 +468,7 @@ class _PlanningMapScreenState extends State<PlanningMapScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
-                  'Ricerca località assistita da Gemini',
+                  'Ricerca località offline Veneto',
                   style: TextStyle(fontSize: 9, color: Colors.black54),
                 ),
               ),

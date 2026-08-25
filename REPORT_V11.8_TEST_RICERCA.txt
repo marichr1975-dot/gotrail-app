@@ -1,0 +1,21 @@
+GoTr-Ail V11.8 TEST RICERCA
+
+Base: V11.7 originale fornita dall'utente.
+Localita Veneto importate da LOCALITA_VENETO_GEONAMES.csv: 7857 righe.
+Chiavi di ricerca generate (nomi + alias deduplicati): 7874.
+
+Modifiche:
+- indice completo Veneto inserito in lib/services/location_search_service.dart
+- mantenuto l'indice manuale originale V11.7
+- priorita alla ricerca offline locale prima di Gemini
+- suggerimenti locali mostrati prima dei risultati online
+- versione aggiornata a 11.8.0+118
+- Home: 11.8 TEST RICERCA
+
+Test inclusi nei dati:
+Auronzo / Auronzo di Cadore
+Misurina
+Forno di Zoldo
+Zoldo Alto
+Mareson-Pecol
+Pecol

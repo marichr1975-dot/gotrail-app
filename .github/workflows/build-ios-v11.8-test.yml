@@ -1,10 +1,10 @@
-name: Build iOS V11.7 IPA
+name: Build iOS V11.8 TEST RICERCA IPA
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - ios-v11.7
+      - ios-v11.8-test
 
 jobs:
   build-ios:
@@ -36,11 +36,7 @@ jobs:
           pod install --repo-update
 
       - name: Build iOS app without signing
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          flutter build ios --release --no-codesign \
-            --dart-define=GEMINI_API_KEY="$GEMINI_API_KEY"
+        run: flutter build ios --release --no-codesign
 
       - name: Package unsigned IPA
         run: |
@@ -48,12 +44,12 @@ jobs:
           mkdir -p build/ipa_unsigned/Payload
           cp -R build/ios/iphoneos/Runner.app build/ipa_unsigned/Payload/
           cd build/ipa_unsigned
-          zip -qry ../GoTr-Ail-V11.7-iOS-unsigned.ipa Payload
+          zip -qry ../GoTr-Ail-V11.8-TEST-RICERCA-iOS-unsigned.ipa Payload
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: GoTr-Ail-V11.7-iOS-unsigned
-          path: build/GoTr-Ail-V11.7-iOS-unsigned.ipa
+          name: GoTr-Ail-V11.8-TEST-RICERCA-iOS-unsigned
+          path: build/GoTr-Ail-V11.8-TEST-RICERCA-iOS-unsigned.ipa
           if-no-files-found: error
           retention-days: 14

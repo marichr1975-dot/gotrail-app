@@ -237,7 +237,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           const Text(
-                            '11.7',
+                            '11.8 TEST RICERCA',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w900,
