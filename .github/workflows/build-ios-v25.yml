@@ -49,7 +49,7 @@ jobs:
           set -o pipefail
           xcodebuild \
             -project iphone/CoreApi/CoreApi.xcodeproj \
-            -target CoreApi \
+            -scheme CoreApi \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
