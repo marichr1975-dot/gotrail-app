@@ -1,4 +1,4 @@
-﻿name: Build GoTr-Ail V25 iOS TEST
+name: Build GoTr-Ail V25 iOS TEST
 
 on:
   workflow_dispatch:
@@ -39,6 +39,10 @@ jobs:
       - name: Xcode version
         run: xcodebuild -version
 
+      - name: Prepare DerivedData
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/GoTrailDerivedData"
+
       - name: Build CoreApi first
         shell: bash
         run: |
@@ -49,17 +53,27 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath "/GoTrailDerivedData" \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
             build
+
       - name: Build Organic Maps iOS V25 without signing
         shell: bash
         run: |
           set -o pipefail
-          rm -rf "$RUNNER_TEMP/GoTrailDerivedData"
-          xcodebuild             -project iphone/Maps/Maps.xcodeproj             -scheme OMaps             -configuration Release             -sdk iphoneos             -destination 'generic/platform=iOS'             -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData"             CODE_SIGNING_ALLOWED=NO             CODE_SIGNING_REQUIRED=NO             CODE_SIGN_IDENTITY=''             build | tee "$RUNNER_TEMP/gotrail-ios-build.log"
+          xcodebuild \
+            -project iphone/Maps/Maps.xcodeproj \
+            -scheme OMaps \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build | tee "$RUNNER_TEMP/gotrail-ios-build.log"
 
       - name: Find app and package unsigned IPA
         shell: bash
@@ -95,4 +109,3 @@ jobs:
           path: ${{ runner.temp }}/gotrail-ios-build.log
           if-no-files-found: ignore
           retention-days: 7
-
