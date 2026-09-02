@@ -1,0 +1,4 @@
+BACKUP V25 - ICONE MAPPA STATO ATTUALE
+Contiene esattamente i file che vengono modificati dal test XL.
+Per tornare indietro: estrarre questo ZIP nella radice del progetto e sovrascrivere i file esistenti.
+Stato attuale: rifugio alpine_hut-m; fontana drinking-water-s; cascata waterfall-s.
