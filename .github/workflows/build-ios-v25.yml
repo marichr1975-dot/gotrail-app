@@ -1,4 +1,4 @@
-name: Build GoTr-Ail V25 iOS TEST
+﻿name: Build GoTr-Ail V25 iOS TEST
 
 on:
   workflow_dispatch:
@@ -39,6 +39,21 @@ jobs:
       - name: Xcode version
         run: xcodebuild -version
 
+      - name: Build CoreApi first
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project iphone/CoreApi/CoreApi.xcodeproj \
+            -target CoreApi \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "/GoTrailDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
       - name: Build Organic Maps iOS V25 without signing
         shell: bash
         run: |
@@ -80,3 +95,4 @@ jobs:
           path: ${{ runner.temp }}/gotrail-ios-build.log
           if-no-files-found: ignore
           retention-days: 7
+
