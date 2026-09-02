@@ -1,0 +1,82 @@
+name: Build GoTr-Ail V25 iOS TEST
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'iphone/**'
+      - 'xcode/**'
+      - '3party/**'
+      - 'data/**'
+      - 'platform/**'
+      - 'map/**'
+      - 'routing/**'
+      - 'indexer/**'
+      - 'geometry/**'
+      - 'drape_frontend/**'
+      - 'drape/**'
+      - 'storage/**'
+      - 'coding/**'
+      - 'base/**'
+      - 'CMakeLists.txt'
+      - '.gitmodules'
+      - '.github/workflows/build-ios-v25.yml'
+
+jobs:
+  build-ios:
+    name: V25 iPhone unsigned IPA
+    runs-on: macos-15
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout V25 with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Xcode version
+        run: xcodebuild -version
+
+      - name: Build Organic Maps iOS V25 without signing
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf "$RUNNER_TEMP/GoTrailDerivedData"
+          xcodebuild             -project iphone/Maps/Maps.xcodeproj             -scheme OMaps             -configuration Release             -sdk iphoneos             -destination 'generic/platform=iOS'             -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData"             CODE_SIGNING_ALLOWED=NO             CODE_SIGNING_REQUIRED=NO             CODE_SIGN_IDENTITY=''             build | tee "$RUNNER_TEMP/gotrail-ios-build.log"
+
+      - name: Find app and package unsigned IPA
+        shell: bash
+        run: |
+          set -e
+          APP_PATH=$(find "$RUNNER_TEMP/GoTrailDerivedData/Build/Products" -maxdepth 3 -type d -name '*.app' ! -path '*Tests*' | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo 'ERRORE: nessuna app iOS trovata.'
+            find "$RUNNER_TEMP/GoTrailDerivedData/Build/Products" -maxdepth 4 -print || true
+            exit 1
+          fi
+          echo "App trovata: $APP_PATH"
+          rm -rf "$RUNNER_TEMP/GoTrailIPA"
+          mkdir -p "$RUNNER_TEMP/GoTrailIPA/Payload"
+          cp -R "$APP_PATH" "$RUNNER_TEMP/GoTrailIPA/Payload/"
+          cd "$RUNNER_TEMP/GoTrailIPA"
+          zip -qry "$GITHUB_WORKSPACE/GoTr-Ail-V25-iOS-TEST-unsigned.ipa" Payload
+          ls -lh "$GITHUB_WORKSPACE/GoTr-Ail-V25-iOS-TEST-unsigned.ipa"
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-V25-iOS-TEST-unsigned
+          path: GoTr-Ail-V25-iOS-TEST-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build log if build fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-V25-iOS-build-log
+          path: ${{ runner.temp }}/gotrail-ios-build.log
+          if-no-files-found: ignore
+          retention-days: 7
