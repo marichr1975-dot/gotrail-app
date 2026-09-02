@@ -37,3 +37,6 @@ desktop.ini
 *.mwm
 *.mwm.ready
 *.mwm.routing
+
+!data/World.mwm
+!data/WorldCoasts.mwm
