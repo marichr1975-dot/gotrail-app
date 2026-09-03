@@ -21,8 +21,6 @@ jobs:
       - name: Xcode
         run: xcodebuild -version
 
-      - name: Configure
-        run: python3 configure.py
 
       - name: Build GoTr-Ail iOS 30.5
         shell: bash
