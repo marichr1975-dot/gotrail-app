@@ -1,0 +1,74 @@
+name: Build GoTr-Ail iOS 30.5
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Xcode
+        run: xcodebuild -version
+
+      - name: Configure
+        run: python3 configure.py
+
+      - name: Build GoTr-Ail iOS 30.5
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf "$RUNNER_TEMP/GoTrailDerivedData"
+          xcodebuild \
+            -workspace xcode/omim.xcworkspace \
+            -scheme OMaps \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build | tee "$RUNNER_TEMP/gotrail-ios-build.log"
+
+      - name: Create unsigned IPA
+        if: success()
+        shell: bash
+        run: |
+          APP_PATH=$(find "$RUNNER_TEMP/GoTrailDerivedData/Build/Products" -type d -name "*.app" | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "APP non trovata"
+            exit 1
+          fi
+          rm -rf "$RUNNER_TEMP/Payload"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP_PATH" "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          zip -qry "GoTr-Ail-30.5-unsigned.ipa" Payload
+
+      - name: Upload IPA
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-30.5-iOS
+          path: ${{ runner.temp }}/GoTr-Ail-30.5-unsigned.ipa
+          retention-days: 7
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-30.5-iOS-build-log
+          path: ${{ runner.temp }}/gotrail-ios-build.log
+          if-no-files-found: ignore
+          retention-days: 7

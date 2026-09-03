@@ -1,0 +1,3 @@
+# Verbatim upstream Boost headers: never touch their bytes, keep them out of the
+# language statistics, and collapse them in diffs so version bumps stay reviewable.
+boost/** -text -whitespace linguist-vendored linguist-generated
