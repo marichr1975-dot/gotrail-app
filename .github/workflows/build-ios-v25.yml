@@ -43,49 +43,17 @@ jobs:
         shell: bash
         run: rm -rf "$RUNNER_TEMP/GoTrailDerivedData"
 
-      - name: Build CoreApi first
+      - name: Build Organic Maps workspace without signing
         shell: bash
         run: |
           set -o pipefail
           xcodebuild \
-            -project iphone/CoreApi/CoreApi.xcodeproj \
-            -scheme CoreApi \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY='' \
-            build
-
-      - name: Build Chart first
-        shell: bash
-        run: |
-          set -o pipefail
-          xcodebuild \
-            -project iphone/Chart/Chart.xcodeproj \
-            -target Chart \
-            -configuration Release \
-            -sdk iphoneos \
-            CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/GoTrailDerivedData/Build/Products/Release-iphoneos" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY='' \
-            build
-
-      - name: Build Organic Maps iOS V25 without signing
-        shell: bash
-        run: |
-          set -o pipefail
-          xcodebuild \
-            -project iphone/Maps/Maps.xcodeproj \
+            -workspace xcode/omim.xcworkspace \
             -scheme OMaps \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
-            FRAMEWORK_SEARCH_PATHS="$RUNNER_TEMP/GoTrailDerivedData/Build/Products/Release-iphoneos $(inherited)" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
