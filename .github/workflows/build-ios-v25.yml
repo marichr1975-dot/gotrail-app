@@ -59,6 +59,22 @@ jobs:
             CODE_SIGN_IDENTITY='' \
             build
 
+      - name: Build Chart first
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project iphone/Chart/Chart.xcodeproj \
+            -target Chart \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
+
       - name: Build Organic Maps iOS V25 without signing
         shell: bash
         run: |
