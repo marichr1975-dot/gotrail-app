@@ -68,8 +68,7 @@ jobs:
             -target Chart \
             -configuration Release \
             -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
+            CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/GoTrailDerivedData/Build/Products/Release-iphoneos" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
@@ -86,6 +85,7 @@ jobs:
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
+            FRAMEWORK_SEARCH_PATHS="$RUNNER_TEMP/GoTrailDerivedData/Build/Products/Release-iphoneos $(inherited)" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
