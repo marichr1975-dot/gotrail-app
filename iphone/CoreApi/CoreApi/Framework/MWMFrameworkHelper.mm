@@ -9,6 +9,7 @@
 #include "Framework.h"
 
 #include "base/sunrise_sunset.hpp"
+#include "geometry/mercator.hpp"
 
 #include "platform/local_country_file_utils.hpp"
 #include "platform/network_policy_ios.h"
@@ -170,6 +171,12 @@ static Framework::ProductsPopupCloseReason ConvertProductPopupCloseReasonToCore(
 + (void)rotateMap:(double)azimuth animated:(BOOL)isAnimated
 {
   GetFramework().Rotate(azimuth, isAnimated);
+}
+
++ (CLLocationCoordinate2D)viewportCenter
+{
+  auto const ll = mercator::ToLatLon(GetFramework().GetViewportCenter());
+  return CLLocationCoordinate2DMake(ll.m_lat, ll.m_lon);
 }
 
 + (void)updatePositionArrowOffset:(BOOL)useDefault offset:(int)offsetY

@@ -73,6 +73,7 @@ NS_SWIFT_NAME(FrameworkHelper)
 + (void)searchInDownloader:(NSString *)query
                inputLocale:(NSString *)locale
                 completion:(SearchInDownloaderCompletions)completion;
++ (CLLocationCoordinate2D)viewportCenter;
 + (BOOL)canEditMapAtViewportCenter;
 + (void)showOnMap:(MWMMarkGroupID)categoryId;
 + (void)showBookmark:(MWMMarkID)bookmarkId;

@@ -38,22 +38,33 @@ drape_ptr<df::UserPointMark::SymbolNameZoomInfo> ApiMarkPoint::GetSymbolNames() 
 {
   auto symbol = make_unique_dp<SymbolNameZoomInfo>();
 
-  // GoTr-Ail: preserve the native API mark coordinates/renderer, changing only
-  // the atlas symbol used for the three analysis categories.
-  std::string_view symbolName = "coloredmark-default-s";
-  if (m_style == "BookmarkOrange")
-    symbolName = "alpine_hut-m";       // rifugio: simbolo nativo caldo, grande
-  else if (m_style == "BookmarkBlue")
-    symbolName = "drinking-water-s";   // fontana: blu, piu piccola
-  else if (m_style == "BookmarkCyan")
-    symbolName = "waterfall-s";        // cascata: azzurra, piu piccola
+  // V30.8.7:
+  // usiamo simboli bookmark NATIVI di Organic Maps, cioè simboli già previsti
+  // per UserMark e quindi compatibili con lo stesso renderer di ApiMarkPoint.
+  // Tutti gli altri deep-link/API mark conservano il comportamento originale.
+  std::string symbolName = "coloredmark-default-s";
 
-  symbol->insert(std::make_pair(1 /* zoomLevel */, std::string(symbolName)));
+  if (m_id == "GOTRAIL_HUT")
+    symbolName = "alpine_hut-m";
+  else if (m_id == "GOTRAIL_WATERFALL")
+    symbolName = "bookmark-water-m";
+  else if (m_id == "GOTRAIL_PARKING")
+    symbolName = "bookmark-parking-m";
+  else if (m_id == "GOTRAIL_INTEREST")
+    symbolName = "bookmark-art-m";
+
+  symbol->insert(std::make_pair(1 /* zoomLevel */, symbolName));
   return symbol;
 }
 
 df::ColorConstant ApiMarkPoint::GetColorConstant() const
 {
+  // GoTr-Ail: the hut icon already contains its own brown circle and house.
+  // Returning the API style color here adds the generic placemark layer
+  // (the triangle/pin effect). Disable that layer only for huts.
+  if (m_id == "GOTRAIL_HUT")
+    return {};
+
   return m_style;
 }
 
