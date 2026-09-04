@@ -82,14 +82,40 @@ final class MainSceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 @objcMembers
 final class GoTrailRootCoordinator: NSObject {
+  private static var bookmarksCoordinator: BookmarksCoordinator?
+
   static func showHome() {
     guard let window = MapsAppDelegate.theApp().window else { return }
+    bookmarksCoordinator = nil
     window.rootViewController = GoTrailHomeViewController()
   }
 
   static func showMap() {
     guard let window = MapsAppDelegate.theApp().window else { return }
+    bookmarksCoordinator = nil
     window.rootViewController = GoTrailMapHostViewController()
+  }
+
+  static func showMaps() {
+    guard let window = MapsAppDelegate.theApp().window else { return }
+    let nav = MapsAppDelegate.theApp().mainNavigationController
+    bookmarksCoordinator = nil
+    nav.navigationBar.isHidden = false
+    window.rootViewController = nav
+    MWMMapViewControlsManager.manager().hidden = true
+    MWMMapViewControlsManager.manager().actionDownloadMaps(.downloaded)
+  }
+
+  static func showSaved() {
+    guard let window = MapsAppDelegate.theApp().window else { return }
+    let nav = MapsAppDelegate.theApp().mainNavigationController
+    nav.navigationBar.isHidden = false
+    window.rootViewController = nav
+    MWMMapViewControlsManager.manager().hidden = true
+    nav.popToRootViewController(animated: false)
+    let coordinator = BookmarksCoordinator(navigationController: nav)
+    bookmarksCoordinator = coordinator
+    coordinator.open()
   }
 }
 
@@ -166,11 +192,11 @@ final class GoTrailHomeViewController: UIViewController {
     page.addArrangedSubview(start)
 
     let maps = makeButton(title: "GESTIONE MAPPE", fill: blue, textColor: .white)
-    maps.addTarget(self, action: #selector(openMap), for: .touchUpInside)
+    maps.addTarget(self, action: #selector(openMaps), for: .touchUpInside)
     page.addArrangedSubview(maps)
 
     let saved = makeButton(title: "PERCORSI SALVATI", fill: .white, textColor: darkText)
-    saved.addTarget(self, action: #selector(openMap), for: .touchUpInside)
+    saved.addTarget(self, action: #selector(openSaved), for: .touchUpInside)
     page.addArrangedSubview(saved)
 
     NSLayoutConstraint.activate([
@@ -205,6 +231,14 @@ final class GoTrailHomeViewController: UIViewController {
   @objc private func openMap() {
     GoTrailRootCoordinator.showMap()
   }
+
+  @objc private func openMaps() {
+    GoTrailRootCoordinator.showMaps()
+  }
+
+  @objc private func openSaved() {
+    GoTrailRootCoordinator.showSaved()
+  }
 }
 
 // MARK: - GoTr-Ail map host
@@ -225,6 +259,10 @@ final class GoTrailMapHostViewController: UIViewController {
   private func attachOrganicMap() {
     let nav = MapsAppDelegate.theApp().mainNavigationController
     organicController = nav
+
+    // GoTr-Ail owns the UI. Organic Maps remains only the map/offline engine.
+    nav.navigationBar.isHidden = true
+    MWMMapViewControlsManager.manager().hidden = true
 
     addChild(nav)
     nav.view.translatesAutoresizingMaskIntoConstraints = false
