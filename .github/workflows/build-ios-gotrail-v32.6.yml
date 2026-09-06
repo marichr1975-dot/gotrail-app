@@ -1,0 +1,89 @@
+name: Build GoTr-Ail iOS V32.6
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "iphone/**"
+      - ".github/workflows/build-ios-gotrail-v32.6.yml"
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Xcode info
+        run: |
+          xcodebuild -version
+          sw_vers
+
+      - name: Detect project
+        id: detect
+        shell: bash
+        run: |
+          if [ -d "xcode/omim.xcworkspace" ]; then
+            echo "mode=workspace" >> "$GITHUB_OUTPUT"
+            echo "path=xcode/omim.xcworkspace" >> "$GITHUB_OUTPUT"
+          elif [ -d "iphone/Maps/Maps.xcworkspace" ]; then
+            echo "mode=workspace" >> "$GITHUB_OUTPUT"
+            echo "path=iphone/Maps/Maps.xcworkspace" >> "$GITHUB_OUTPUT"
+          elif [ -d "iphone/Maps/Maps.xcodeproj" ]; then
+            echo "mode=project" >> "$GITHUB_OUTPUT"
+            echo "path=iphone/Maps/Maps.xcodeproj" >> "$GITHUB_OUTPUT"
+          else
+            echo "Progetto iOS non trovato"
+            find . -maxdepth 4 \( -name "*.xcworkspace" -o -name "*.xcodeproj" \) -print
+            exit 2
+          fi
+
+      - name: Build
+        shell: bash
+        run: |
+          set -o pipefail
+          DERIVED="$RUNNER_TEMP/GoTrailDerivedData"
+          LOG="$RUNNER_TEMP/gotrail-ios-v32.6-build.log"
+          rm -rf "$DERIVED"
+
+          if [ "${{ steps.detect.outputs.mode }}" = "workspace" ]; then
+            xcodebuild               -workspace "${{ steps.detect.outputs.path }}"               -scheme OMaps               -configuration Release               -sdk iphoneos               -destination 'generic/platform=iOS'               -derivedDataPath "$DERIVED"               CODE_SIGNING_ALLOWED=NO               CODE_SIGNING_REQUIRED=NO               CODE_SIGN_IDENTITY=""               build | tee "$LOG"
+          else
+            xcodebuild               -project "${{ steps.detect.outputs.path }}"               -scheme OMaps               -configuration Release               -sdk iphoneos               -destination 'generic/platform=iOS'               -derivedDataPath "$DERIVED"               CODE_SIGNING_ALLOWED=NO               CODE_SIGNING_REQUIRED=NO               CODE_SIGN_IDENTITY=""               build | tee "$LOG"
+          fi
+
+      - name: Create unsigned IPA
+        if: success()
+        shell: bash
+        run: |
+          set -euxo pipefail
+          DERIVED="$RUNNER_TEMP/GoTrailDerivedData"
+          APP_PATH="$(find "$DERIVED/Build/Products" -type d -name "*.app" | head -1)"
+          test -n "$APP_PATH"
+          rm -rf "$RUNNER_TEMP/Payload"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP_PATH" "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          zip -qry "GoTr-Ail-V32.6-unsigned.ipa" Payload
+
+      - name: Upload IPA
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-V32.6-iOS
+          path: ${{ runner.temp }}/GoTr-Ail-V32.6-unsigned.ipa
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-V32.6-iOS-build-log
+          path: ${{ runner.temp }}/gotrail-ios-v32.6-build.log
+          if-no-files-found: ignore

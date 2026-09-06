@@ -119,12 +119,14 @@ final class GoTrailRootCoordinator: NSObject {
   }
 }
 
-// MARK: - Home V30.10.1
+// MARK: - Home V32.6
 
 final class GoTrailHomeViewController: UIViewController {
-  private let blue = UIColor(red: 11.0 / 255.0, green: 95.0 / 255.0, blue: 215.0 / 255.0, alpha: 1.0)
+  private let blue = UIColor(red: 25.0 / 255.0, green: 126.0 / 255.0, blue: 224.0 / 255.0, alpha: 1.0)
   private let green = UIColor(red: 32.0 / 255.0, green: 168.0 / 255.0, blue: 90.0 / 255.0, alpha: 1.0)
   private let darkText = UIColor(red: 23.0 / 255.0, green: 44.0 / 255.0, blue: 67.0 / 255.0, alpha: 1.0)
+  private let sky = UIColor(red: 56.0 / 255.0, green: 126.0 / 255.0, blue: 203.0 / 255.0, alpha: 1.0)
+  private let forest = UIColor(red: 18.0 / 255.0, green: 42.0 / 255.0, blue: 45.0 / 255.0, alpha: 1.0)
 
   override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
 
@@ -134,97 +136,145 @@ final class GoTrailHomeViewController: UIViewController {
   }
 
   private func buildInterface() {
-    view.backgroundColor = UIColor(red: 7.0 / 255.0, green: 23.0 / 255.0, blue: 37.0 / 255.0, alpha: 1.0)
+    view.backgroundColor = forest
+
+    // V32.6 Android equivalent:
+    // sky 0.88 / original Pelmo photo 1.55 / forest 1.25.
+    // No gradient over the photograph.
+    let scenery = UIView()
+    scenery.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(scenery)
+
+    let skyFill = UIView()
+    skyFill.translatesAutoresizingMaskIntoConstraints = false
+    skyFill.backgroundColor = sky
+    scenery.addSubview(skyFill)
 
     let background = UIImageView(image: UIImage(named: "gotrail_home_pelmo"))
     background.translatesAutoresizingMaskIntoConstraints = false
-    background.contentMode = .scaleAspectFill
+    background.contentMode = .scaleToFill
     background.clipsToBounds = true
-    view.addSubview(background)
+    scenery.addSubview(background)
 
-    let shade = GradientView()
-    shade.translatesAutoresizingMaskIntoConstraints = false
-    shade.colors = [
-      UIColor(red: 0, green: 8.0 / 255.0, blue: 24.0 / 255.0, alpha: 0.13),
-      UIColor(red: 0, green: 8.0 / 255.0, blue: 24.0 / 255.0, alpha: 0.40),
-      UIColor(red: 7.0 / 255.0, green: 23.0 / 255.0, blue: 37.0 / 255.0, alpha: 0.94)
-    ]
-    view.addSubview(shade)
+    let forestFill = UIView()
+    forestFill.translatesAutoresizingMaskIntoConstraints = false
+    forestFill.backgroundColor = forest
+    scenery.addSubview(forestFill)
 
-    let page = UIStackView()
+    let page = UIView()
     page.translatesAutoresizingMaskIntoConstraints = false
-    page.axis = .vertical
-    page.spacing = 10
     view.addSubview(page)
 
-    let titleRow = UIStackView()
-    titleRow.axis = .horizontal
-    titleRow.alignment = .center
-
     let title = UILabel()
+    title.translatesAutoresizingMaskIntoConstraints = false
     title.text = "GoTr-Ail"
     title.textColor = .white
-    title.font = .systemFont(ofSize: 30, weight: .bold)
-    titleRow.addArrangedSubview(title)
-
-    let version = UILabel()
-    version.text = "v.30.10.1"
-    version.textColor = .white
-    version.font = .systemFont(ofSize: 14, weight: .bold)
-    version.textAlignment = .right
-    titleRow.addArrangedSubview(version)
-    title.setContentHuggingPriority(.defaultLow, for: .horizontal)
-    version.setContentHuggingPriority(.required, for: .horizontal)
-    page.addArrangedSubview(titleRow)
+    title.font = .systemFont(ofSize: 31, weight: .bold)
+    title.textAlignment = .center
+    page.addSubview(title)
 
     let subtitle = UILabel()
+    subtitle.translatesAutoresizingMaskIntoConstraints = false
     subtitle.text = "Il tuo accompagnatore nei sentieri"
-    subtitle.textColor = UIColor(red: 234.0 / 255.0, green: 244.0 / 255.0, blue: 1.0, alpha: 1.0)
+    subtitle.textColor = .white
     subtitle.font = .systemFont(ofSize: 13, weight: .bold)
-    page.addArrangedSubview(subtitle)
+    subtitle.textAlignment = .center
+    page.addSubview(subtitle)
 
-    let spacer = UIView()
-    spacer.setContentHuggingPriority(.defaultLow, for: .vertical)
-    page.addArrangedSubview(spacer)
+    let version = UILabel()
+    version.translatesAutoresizingMaskIntoConstraints = false
+    version.text = "v.32.6"
+    version.textColor = .white
+    version.font = .systemFont(ofSize: 13, weight: .bold)
+    version.textAlignment = .right
+    page.addSubview(version)
 
-    let start = makeButton(title: "INIZIA", fill: green, textColor: .white)
+    let actions = UIStackView()
+    actions.translatesAutoresizingMaskIntoConstraints = false
+    actions.axis = .vertical
+    actions.alignment = .fill
+    actions.distribution = .fill
+    actions.spacing = 7
+    page.addSubview(actions)
+
+    let start = makeButton(title: "INIZIA", fill: green, textColor: .white, symbol: "magnifyingglass")
     start.addTarget(self, action: #selector(openMap), for: .touchUpInside)
-    page.addArrangedSubview(start)
+    actions.addArrangedSubview(start)
 
-    let maps = makeButton(title: "GESTIONE MAPPE", fill: blue, textColor: .white)
+    let maps = makeButton(title: "GESTIONE MAPPE", fill: blue, textColor: .white, symbol: "map")
     maps.addTarget(self, action: #selector(openMaps), for: .touchUpInside)
-    page.addArrangedSubview(maps)
+    actions.addArrangedSubview(maps)
 
-    let saved = makeButton(title: "PERCORSI SALVATI", fill: .white, textColor: darkText)
+    let saved = makeButton(title: "PERCORSI SALVATI", fill: .white, textColor: darkText, symbol: "bookmark")
     saved.addTarget(self, action: #selector(openSaved), for: .touchUpInside)
-    page.addArrangedSubview(saved)
+    actions.addArrangedSubview(saved)
+
+    // 0.88 + 1.55 + 1.25 = 3.68
+    let skyRatio = 0.88 / 3.68
+    let photoRatio = 1.55 / 3.68
 
     NSLayoutConstraint.activate([
-      background.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-      background.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-      background.topAnchor.constraint(equalTo: view.topAnchor),
-      background.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+      scenery.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      scenery.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      scenery.topAnchor.constraint(equalTo: view.topAnchor),
+      scenery.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-      shade.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-      shade.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-      shade.topAnchor.constraint(equalTo: view.topAnchor),
-      shade.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+      skyFill.leadingAnchor.constraint(equalTo: scenery.leadingAnchor),
+      skyFill.trailingAnchor.constraint(equalTo: scenery.trailingAnchor),
+      skyFill.topAnchor.constraint(equalTo: scenery.topAnchor),
+      skyFill.heightAnchor.constraint(equalTo: scenery.heightAnchor, multiplier: skyRatio),
 
-      page.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 18),
-      page.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -18),
-      page.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-      page.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -18)
+      background.leadingAnchor.constraint(equalTo: scenery.leadingAnchor),
+      background.trailingAnchor.constraint(equalTo: scenery.trailingAnchor),
+      background.topAnchor.constraint(equalTo: skyFill.bottomAnchor),
+      background.heightAnchor.constraint(equalTo: scenery.heightAnchor, multiplier: photoRatio),
+
+      forestFill.leadingAnchor.constraint(equalTo: scenery.leadingAnchor),
+      forestFill.trailingAnchor.constraint(equalTo: scenery.trailingAnchor),
+      forestFill.topAnchor.constraint(equalTo: background.bottomAnchor),
+      forestFill.bottomAnchor.constraint(equalTo: scenery.bottomAnchor),
+
+      page.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
+      page.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+      page.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+      page.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+
+      title.topAnchor.constraint(equalTo: page.topAnchor),
+      title.centerXAnchor.constraint(equalTo: page.centerXAnchor),
+
+      subtitle.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 2),
+      subtitle.centerXAnchor.constraint(equalTo: page.centerXAnchor),
+
+      version.topAnchor.constraint(equalTo: page.topAnchor),
+      version.trailingAnchor.constraint(equalTo: page.trailingAnchor),
+
+      actions.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+      actions.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+      actions.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -10),
+
+      start.heightAnchor.constraint(equalToConstant: 52),
+      maps.heightAnchor.constraint(equalToConstant: 52),
+      saved.heightAnchor.constraint(equalToConstant: 52)
     ])
   }
 
-  private func makeButton(title: String, fill: UIColor, textColor: UIColor) -> UIButton {
+  private func makeButton(title: String, fill: UIColor, textColor: UIColor, symbol: String) -> UIButton {
     let button = UIButton(type: .system)
-    button.setTitle(title, for: .normal)
-    button.setTitleColor(textColor, for: .normal)
+    var config = UIButton.Configuration.plain()
+    config.title = title
+    config.image = UIImage(systemName: symbol)
+    config.imagePadding = 12
+    config.baseForegroundColor = textColor
+    config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 18, bottom: 0, trailing: 18)
+    button.configuration = config
+    button.contentHorizontalAlignment = .leading
     button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
     button.backgroundColor = fill
-    button.layer.cornerRadius = 17
-    button.heightAnchor.constraint(equalToConstant: 58).isActive = true
+    button.layer.cornerRadius = 16
+    if fill == .white {
+      button.layer.borderWidth = 1
+      button.layer.borderColor = UIColor.black.withAlphaComponent(0.13).cgColor
+    }
     return button
   }
 
