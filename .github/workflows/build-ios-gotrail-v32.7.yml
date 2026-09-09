@@ -45,14 +45,29 @@ jobs:
         run: |
           xcodebuild -workspace xcode/omim.xcworkspace -scheme OMaps -configuration Release -sdk iphoneos -derivedDataPath "$RUNNER_TEMP/GoTrailSharedDerivedData" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
 
+      - name: Locate built app
+        run: |
+          echo "=== APP PRODOTTE ==="
+          find "$RUNNER_TEMP/GoTrailSharedDerivedData/Build/Products" -type d -name "*.app" -print
+          echo "=== PRODUCTS ==="
+          find "$RUNNER_TEMP/GoTrailSharedDerivedData/Build/Products" -maxdepth 2 -type d -print
+
       - name: Package unsigned IPA
         run: |
-          APP_PATH="$RUNNER_TEMP/GoTrailSharedDerivedData/Build/Products/Release-iphoneos/OMaps.app"
-          test -d "$APP_PATH"
+          set -e
+          APP_PATH=$(find "$RUNNER_TEMP/GoTrailSharedDerivedData/Build/Products" -type d -name "*.app" -print -quit)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERRORE: nessuna app .app trovata."
+            exit 1
+          fi
+          echo "App trovata: $APP_PATH"
+          rm -rf "$RUNNER_TEMP/Payload"
           mkdir -p "$RUNNER_TEMP/Payload"
           cp -R "$APP_PATH" "$RUNNER_TEMP/Payload/"
           cd "$RUNNER_TEMP"
+          rm -f "GoTr-Ail-iOS-V32.7-unsigned.ipa"
           zip -qry "GoTr-Ail-iOS-V32.7-unsigned.ipa" Payload
+          ls -lh "GoTr-Ail-iOS-V32.7-unsigned.ipa"
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
@@ -66,5 +81,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GoTr-Ail-iOS-V32.7-build-logs
-          path: ${{ runner.temp }}/GoTrailSharedDerivedData
+          path: ${{ runner.temp }}/GoTrailSharedDerivedData/Logs
           if-no-files-found: ignore
