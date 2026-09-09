@@ -1,0 +1,151 @@
+name: Build GoTr-Ail V32.7 iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'iphone/**'
+      - 'xcode/**'
+      - '3party/**'
+      - 'data/**'
+      - 'platform/**'
+      - 'map/**'
+      - 'routing/**'
+      - 'indexer/**'
+      - 'geometry/**'
+      - 'drape_frontend/**'
+      - 'drape/**'
+      - 'storage/**'
+      - 'coding/**'
+      - 'base/**'
+      - 'CMakeLists.txt'
+      - '.gitmodules'
+      - '.github/workflows/build-ios-gotrail-v32.7.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    name: GoTr-Ail V32.7 iPhone IPA
+    runs-on: macos-15
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4'
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          git submodule status --recursive | head -80
+
+      - name: Validate GoTr-Ail source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f iphone/Maps/Core/AppDelegate/MainSceneDelegate.swift
+          test -f iphone/Maps/Maps.xcodeproj/project.pbxproj
+          test -f xcode/omim.xcworkspace/contents.xcworkspacedata
+          grep -q 'GoTrailHomeViewController' iphone/Maps/Core/AppDelegate/MainSceneDelegate.swift
+          grep -q 'GoTrailAnalyzeViewController' iphone/Maps/Core/AppDelegate/MainSceneDelegate.swift
+
+      - name: Build CoreApi
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf "$RUNNER_TEMP/GoTrailCoreApiDerivedData"
+          xcodebuild \
+            -project iphone/CoreApi/CoreApi.xcodeproj \
+            -scheme CoreApi \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailCoreApiDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build | tee "$RUNNER_TEMP/gotrail-coreapi-build.log"
+
+      - name: Build Chart
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf "$RUNNER_TEMP/GoTrailChartDerivedData"
+          xcodebuild \
+            -project iphone/Chart/Chart.xcodeproj \
+            -scheme Chart \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailChartDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build | tee "$RUNNER_TEMP/gotrail-chart-build.log"
+
+      - name: Build OMaps
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf "$RUNNER_TEMP/GoTrailDerivedData"
+          xcodebuild \
+            -project iphone/Maps/Maps.xcodeproj \
+            -scheme OMaps \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build | tee "$RUNNER_TEMP/gotrail-ios-build.log"
+
+      - name: Package unsigned IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          PRODUCTS="$RUNNER_TEMP/GoTrailDerivedData/Build/Products"
+          APP_PATH=$(find "$PRODUCTS" -maxdepth 4 -type d -name '*.app' ! -path '*Tests*' | head -n 1)
+          if [ -z "${APP_PATH:-}" ]; then
+            echo 'ERRORE: nessuna app iOS trovata.'
+            find "$PRODUCTS" -maxdepth 4 -print || true
+            exit 1
+          fi
+          echo "App trovata: $APP_PATH"
+          rm -rf "$RUNNER_TEMP/GoTrailIPA"
+          mkdir -p "$RUNNER_TEMP/GoTrailIPA/Payload"
+          cp -R "$APP_PATH" "$RUNNER_TEMP/GoTrailIPA/Payload/"
+          cd "$RUNNER_TEMP/GoTrailIPA"
+          zip -qry "$GITHUB_WORKSPACE/GoTr-Ail-V32.7-iOS-unsigned.ipa" Payload
+          ls -lh "$GITHUB_WORKSPACE/GoTr-Ail-V32.7-iOS-unsigned.ipa"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-V32.7-iOS-unsigned
+          path: GoTr-Ail-V32.7-iOS-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoTr-Ail-V32.7-iOS-build-logs
+          path: |
+            ${{ runner.temp }}/gotrail-coreapi-build.log
+            ${{ runner.temp }}/gotrail-chart-build.log
+            ${{ runner.temp }}/gotrail-ios-build.log
+          if-no-files-found: ignore
+          retention-days: 7
