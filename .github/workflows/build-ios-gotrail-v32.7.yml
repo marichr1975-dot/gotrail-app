@@ -57,21 +57,28 @@ jobs:
           test -f iphone/Maps/Core/AppDelegate/MainSceneDelegate.swift
           test -f iphone/Maps/Maps.xcodeproj/project.pbxproj
           test -f xcode/omim.xcworkspace/contents.xcworkspacedata
+          test -d iphone/Maps/Resources/Images.xcassets/AppIcon.appiconset
           grep -q 'GoTrailHomeViewController' iphone/Maps/Core/AppDelegate/MainSceneDelegate.swift
           grep -q 'GoTrailAnalyzeViewController' iphone/Maps/Core/AppDelegate/MainSceneDelegate.swift
+
+      - name: Prepare shared DerivedData
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/GoTrailSharedDerivedData"
+          mkdir -p "$RUNNER_TEMP/GoTrailSharedDerivedData"
 
       - name: Build CoreApi
         shell: bash
         run: |
           set -o pipefail
-          rm -rf "$RUNNER_TEMP/GoTrailCoreApiDerivedData"
           xcodebuild \
             -project iphone/CoreApi/CoreApi.xcodeproj \
             -scheme CoreApi \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath "$RUNNER_TEMP/GoTrailCoreApiDerivedData" \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailSharedDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
@@ -81,14 +88,13 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          rm -rf "$RUNNER_TEMP/GoTrailChartDerivedData"
           xcodebuild \
             -project iphone/Chart/Chart.xcodeproj \
             -scheme Chart \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath "$RUNNER_TEMP/GoTrailChartDerivedData" \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailSharedDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
@@ -98,14 +104,13 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          rm -rf "$RUNNER_TEMP/GoTrailDerivedData"
           xcodebuild \
             -project iphone/Maps/Maps.xcodeproj \
             -scheme OMaps \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath "$RUNNER_TEMP/GoTrailDerivedData" \
+            -derivedDataPath "$RUNNER_TEMP/GoTrailSharedDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
@@ -115,11 +120,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          PRODUCTS="$RUNNER_TEMP/GoTrailDerivedData/Build/Products"
+          PRODUCTS="$RUNNER_TEMP/GoTrailSharedDerivedData/Build/Products"
           APP_PATH=$(find "$PRODUCTS" -maxdepth 4 -type d -name '*.app' ! -path '*Tests*' | head -n 1)
           if [ -z "${APP_PATH:-}" ]; then
             echo 'ERRORE: nessuna app iOS trovata.'
-            find "$PRODUCTS" -maxdepth 4 -print || true
+            find "$PRODUCTS" -maxdepth 5 -print || true
             exit 1
           fi
           echo "App trovata: $APP_PATH"
