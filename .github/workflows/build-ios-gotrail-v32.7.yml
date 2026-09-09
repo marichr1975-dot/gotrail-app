@@ -34,7 +34,7 @@ jobs:
 
       - name: Build timezone
         run: |
-          xcodebuild -project xcode/timezone/timezone.xcodeproj -target timezone -configuration Release -sdk iphoneos -derivedDataPath "$RUNNER_TEMP/GoTrailSharedDerivedData" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+          xcodebuild -project xcode/timezone/timezone.xcodeproj -scheme timezone -configuration Release -sdk iphoneos -derivedDataPath "$RUNNER_TEMP/GoTrailSharedDerivedData" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
           find "$RUNNER_TEMP/GoTrailSharedDerivedData" -name "libtimezone.a" -print
 
       - name: Verify GoTr-Ail AppIcon
