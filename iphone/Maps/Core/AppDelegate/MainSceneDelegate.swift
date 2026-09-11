@@ -289,7 +289,7 @@ final class GoTrailMapHostViewController: UIViewController {
     // La mappa Organic Maps occupa tutto lo schermo.
     let analyze = UIButton(type: .system)
     analyze.translatesAutoresizingMaskIntoConstraints = false
-    analyze.setTitle("ANALIZZA ZONA", for: .normal)
+    analyze.setTitle(ANALIZZA ZONA, for: .normal)
     analyze.setTitleColor(.white, for: .normal)
     analyze.titleLabel?.font = .systemFont(ofSize: 15, weight: .bold)
     analyze.titleLabel?.adjustsFontSizeToFitWidth = true
@@ -785,4 +785,5 @@ private final class GradientView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
 }
+
 
