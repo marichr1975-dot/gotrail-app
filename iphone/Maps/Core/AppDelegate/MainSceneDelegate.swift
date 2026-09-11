@@ -1,4 +1,4 @@
-﻿import UIKit
+import UIKit
 import CoreLocation
 
 @objc(MainSceneDelegate)
@@ -288,7 +288,7 @@ final class GoTrailMapHostViewController: UIViewController {
     // V32.9: barra bianca superiore GoTr-Ail rimossa.
     let analyze = UIButton(type: .system)
     analyze.translatesAutoresizingMaskIntoConstraints = false
-    analyze.setTitle("ANALIZZA ZONA, for: .normal)
+    analyze.setTitle("ANALIZZA ZONA", for: .normal)
  analyze.setTitleColor(.white, for: .normal)
  analyze.titleLabel?.font = .systemFont(ofSize: 15, weight: .bold)
  analyze.titleLabel?.adjustsFontSizeToFitWidth = true
