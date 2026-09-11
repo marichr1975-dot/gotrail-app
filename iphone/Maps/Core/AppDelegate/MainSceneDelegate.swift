@@ -285,27 +285,26 @@ final class GoTrailMapHostViewController: UIViewController {
   }
 
   private func buildGoTrailControls() {
-    // V32.9: barra bianca superiore rimossa.
-    // La mappa Organic Maps occupa tutto lo schermo.
+    // V32.9: barra bianca superiore GoTr-Ail rimossa.
     let analyze = UIButton(type: .system)
     analyze.translatesAutoresizingMaskIntoConstraints = false
-    analyze.setTitle(ANALIZZA ZONA, for: .normal)
-    analyze.setTitleColor(.white, for: .normal)
-    analyze.titleLabel?.font = .systemFont(ofSize: 15, weight: .bold)
-    analyze.titleLabel?.adjustsFontSizeToFitWidth = true
-    analyze.titleLabel?.minimumScaleFactor = 0.75
-    analyze.backgroundColor = green
-    analyze.layer.cornerRadius = 16
-    analyze.addTarget(self, action: #selector(openAnalyze), for: .touchUpInside)
-    view.addSubview(analyze)
+    analyze.setTitle("ANALIZZA ZONA, for: .normal)
+ analyze.setTitleColor(.white, for: .normal)
+ analyze.titleLabel?.font = .systemFont(ofSize: 15, weight: .bold)
+ analyze.titleLabel?.adjustsFontSizeToFitWidth = true
+ analyze.titleLabel?.minimumScaleFactor = 0.75
+ analyze.backgroundColor = green
+ analyze.layer.cornerRadius = 16
+ analyze.addTarget(self, action: #selector(openAnalyze), for: .touchUpInside)
+ view.addSubview(analyze)
 
-    NSLayoutConstraint.activate([
-      analyze.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 18),
-      analyze.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -18),
-      analyze.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
-      analyze.heightAnchor.constraint(greaterThanOrEqualToConstant: 50)
-    ])
-  }
+ NSLayoutConstraint.activate([
+ analyze.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 18),
+ analyze.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -18),
+ analyze.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+ analyze.heightAnchor.constraint(greaterThanOrEqualToConstant: 50)
+ ])
+ }
   @objc private func goHome() {
     detachOrganicMap()
     GoTrailRootCoordinator.showHome()
@@ -785,5 +784,7 @@ private final class GradientView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
 }
+
+
 
 
