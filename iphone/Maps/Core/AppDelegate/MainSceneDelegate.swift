@@ -1,4 +1,4 @@
-import UIKit
+﻿import UIKit
 import CoreLocation
 
 @objc(MainSceneDelegate)
@@ -285,37 +285,8 @@ final class GoTrailMapHostViewController: UIViewController {
   }
 
   private func buildGoTrailControls() {
-    let topBar = UIView()
-    topBar.translatesAutoresizingMaskIntoConstraints = false
-    topBar.backgroundColor = UIColor.white.withAlphaComponent(0.96)
-    topBar.layer.cornerRadius = 16
-    topBar.layer.shadowOpacity = 0.17
-    topBar.layer.shadowRadius = 7
-    topBar.layer.shadowOffset = CGSize(width: 0, height: 2)
-    view.addSubview(topBar)
-
-    let home = UIButton(type: .system)
-    home.translatesAutoresizingMaskIntoConstraints = false
-    home.setImage(UIImage(systemName: "house.fill"), for: .normal)
-    home.tintColor = blue
-    home.addTarget(self, action: #selector(goHome), for: .touchUpInside)
-    topBar.addSubview(home)
-
-    let label = UILabel()
-    label.translatesAutoresizingMaskIntoConstraints = false
-    label.text = "GoTr-Ail"
-    label.textColor = darkText
-    label.font = .systemFont(ofSize: 18, weight: .bold)
-    topBar.addSubview(label)
-
-    let search = UIButton(type: .system)
-    search.translatesAutoresizingMaskIntoConstraints = false
-    search.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-    search.tintColor = blue
-    search.accessibilityLabel = "Ricerca"
-    search.addTarget(self, action: #selector(openSearch), for: .touchUpInside)
-    topBar.addSubview(search)
-
+    // V32.9: barra bianca superiore rimossa.
+    // La mappa Organic Maps occupa tutto lo schermo.
     let analyze = UIButton(type: .system)
     analyze.translatesAutoresizingMaskIntoConstraints = false
     analyze.setTitle("ANALIZZA ZONA", for: .normal)
@@ -329,32 +300,12 @@ final class GoTrailMapHostViewController: UIViewController {
     view.addSubview(analyze)
 
     NSLayoutConstraint.activate([
-      topBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-      topBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
-      topBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 7),
-      topBar.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
-
-      home.leadingAnchor.constraint(equalTo: topBar.leadingAnchor, constant: 8),
-      home.centerYAnchor.constraint(equalTo: topBar.centerYAnchor),
-      home.widthAnchor.constraint(equalToConstant: 40),
-      home.heightAnchor.constraint(equalToConstant: 40),
-
-      label.leadingAnchor.constraint(equalTo: home.trailingAnchor, constant: 7),
-      label.centerYAnchor.constraint(equalTo: topBar.centerYAnchor),
-      label.trailingAnchor.constraint(lessThanOrEqualTo: search.leadingAnchor, constant: -6),
-
-      search.trailingAnchor.constraint(equalTo: topBar.trailingAnchor, constant: -7),
-      search.centerYAnchor.constraint(equalTo: topBar.centerYAnchor),
-      search.widthAnchor.constraint(equalToConstant: 42),
-      search.heightAnchor.constraint(equalToConstant: 42),
-
       analyze.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 18),
       analyze.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -18),
       analyze.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
       analyze.heightAnchor.constraint(greaterThanOrEqualToConstant: 50)
     ])
   }
-
   @objc private func goHome() {
     detachOrganicMap()
     GoTrailRootCoordinator.showHome()
@@ -533,7 +484,7 @@ final class GoTrailAnalyzeViewController: UIViewController {
     header.spacing = 8
 
     let back = UIButton(type: .system)
-    back.setTitle("‹", for: .normal)
+    back.setTitle("â€¹", for: .normal)
     back.titleLabel?.font = .systemFont(ofSize: 34, weight: .bold)
     back.addTarget(self, action: #selector(close), for: .touchUpInside)
     back.widthAnchor.constraint(equalToConstant: 42).isActive = true
@@ -571,7 +522,7 @@ final class GoTrailAnalyzeViewController: UIViewController {
 
     status.numberOfLines = 0
     status.textAlignment = .center
-    status.text = "Analisi delle mappe locali in corso…"
+    status.text = "Analisi delle mappe locali in corsoâ€¦"
     status.textColor = UIColor(red: 95.0 / 255.0, green: 108.0 / 255.0, blue: 121.0 / 255.0, alpha: 1)
     status.font = .systemFont(ofSize: 13, weight: .medium)
     page.addArrangedSubview(status)
@@ -633,7 +584,7 @@ final class GoTrailAnalyzeViewController: UIViewController {
 
     let value = UILabel()
     value.translatesAutoresizingMaskIntoConstraints = false
-    value.text = "—"
+    value.text = "â€”"
     value.textColor = green
     value.font = .systemFont(ofSize: 15, weight: .bold)
     value.textAlignment = .right
@@ -688,7 +639,7 @@ final class GoTrailAnalyzeViewController: UIViewController {
     let item = searches[queryIndex]
     let pct = 15 + Int((70.0 * Double(queryIndex)) / Double(max(1, searches.count - 1)))
     setProgress(pct)
-    status.text = "Analisi delle mappe locali in corso…"
+    status.text = "Analisi delle mappe locali in corsoâ€¦"
 
     searchService?.searchText(item.0, forInputLocale: "it") { [weak self] results in
       guard let self else { return }
@@ -716,7 +667,7 @@ final class GoTrailAnalyzeViewController: UIViewController {
   private func updateCategoryCounts() {
     for category in GoTrailPoiCategory.allCases {
       let n = found.values.filter { $0.category == category }.count
-      categoryRows[category]?.text = n == 0 ? "0" : "✓  \(n)"
+      categoryRows[category]?.text = n == 0 ? "0" : "âœ“  \(n)"
     }
   }
 
@@ -834,3 +785,4 @@ private final class GradientView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
 }
+

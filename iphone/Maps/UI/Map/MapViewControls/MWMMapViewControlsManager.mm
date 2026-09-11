@@ -1,4 +1,4 @@
-#import "MWMMapViewControlsManager.h"
+﻿#import "MWMMapViewControlsManager.h"
 #import "MWMAddPlaceNavigationBar.h"
 #import "MWMMapDownloadDialog.h"
 #import "MWMMapViewControlsManager+AddPlace.h"
@@ -155,7 +155,7 @@ NSString * const kMapToCategorySelectorSegue = @"MapToCategorySelectorSegue";
         {
           // Snapshot the position now: by the time the user picks a category the viewport may
           // have drifted (location follow, layout changes) and the recheck inside CreateMapObject
-          // would land on a different — possibly unloaded — MWM.
+          // would land on a different â€” possibly unloaded â€” MWM.
           m2::PointD const position = GetFramework().GetViewportCenter();
           NSValue * sender = [NSValue valueWithBytes:&position objCType:@encode(m2::PointD)];
           [ownerController performSegueWithIdentifier:kMapToCategorySelectorSegue sender:sender];
@@ -255,6 +255,7 @@ NSString * const kMapToCategorySelectorSegue = @"MapToCategorySelectorSegue";
   {
     MapViewController * ownerController = _ownerController;
     _tabBarController = [BottomTabBarBuilder buildWithMapViewController:ownerController controlsManager:self];
+    _tabBarController.isHidden = self.hidden;
     [ownerController addChildViewController:_tabBarController];
     UIView * tabBarViewSuperView = ownerController.controlsView;
     [tabBarViewSuperView addSubview:_tabBarController.view];
@@ -378,3 +379,4 @@ NSString * const kMapToCategorySelectorSegue = @"MapToCategorySelectorSegue";
 }
 
 @end
+
